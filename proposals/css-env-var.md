@@ -59,3 +59,29 @@ browser.css.defineEnvVar({
 
 This example would define a new CSS environmental variable `--my-custom-var` with the value `blue`, as well as defining/overwriting the browser provieed `keyboard-inset-height` with `50vh`.
 
+### New Permissions
+
+None.
+
+### Manifest File Changes
+
+None.
+
+### Abuse Mitigations
+
+Any abuse angle would already be possible by injecting custom CSS, which any extension can do today with host permissions. No new mitigation is warranted
+
+## Alternatives
+
+### Existing Workarounds
+
+- For cases where the extension user owns the site, they can use add additional classes that have a higher priority than those using the browser defined environment variable.
+- For arbitrary websites, the same can be accomplished, but it would require parsing the CSS rules on the page (which would be quite costly).
+
+### Open Web API
+
+- There won't likely be an Open Web API for this as it is intended be set by the browser. There may be a WebDriver based option to set these values. There is not one today, however.
+
+## Future Work
+
+`browser.css` could be expanded to do more advanced CSS interactions, perhaps building on top of the [CSS Houdini APIs](https://developer.mozilla.org/docs/Web/CSS/CSS_Houdini).
