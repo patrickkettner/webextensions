@@ -1,0 +1,2058 @@
+<!doctype html><html lang="en">
+ <head>
+  <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+  <meta content="width=device-width, initial-scale=1, shrink-to-fit=no" name="viewport">
+  <title>Extension Service Workers</title>
+  <meta content="CG-DRAFT" name="w3c-status">
+  <link href="https://www.w3.org/StyleSheets/TR/2021/cg-draft" rel="stylesheet">
+  <meta content="Bikeshed version 49e9fdd4f, updated Tue Oct 13 14:27:53 2026 -0700" name="generator">
+  <link href="https://w3c.github.io/webextensions/specification/extension-service-workers.html" rel="canonical">
+  <meta content="02ef7f7a42948d61e613d97b97403ab9768d0c4c" name="revision">
+  <meta content="dark light" name="color-scheme">
+  <link href="https://www.w3.org/StyleSheets/TR/2021/dark.css" media="(prefers-color-scheme: dark)" rel="stylesheet" type="text/css">
+<style>/* Boilerplate: style-autolinks */
+.css.css, .property.property, .descriptor.descriptor {
+    color: var(--a-normal-text);
+    font-size: inherit;
+    font-family: inherit;
+}
+.css::before, .property::before, .descriptor::before {
+    content: "‘";
+}
+.css::after, .property::after, .descriptor::after {
+    content: "’";
+}
+.property, .descriptor {
+    /* Don't wrap property and descriptor names */
+    white-space: nowrap;
+}
+.type { /* CSS value <type> */
+    font-style: italic;
+}
+pre .property::before, pre .property::after {
+    content: "";
+}
+[data-link-type="property"]::before,
+[data-link-type="propdesc"]::before,
+[data-link-type="descriptor"]::before,
+[data-link-type="value"]::before,
+[data-link-type="function"]::before,
+[data-link-type="at-rule"]::before,
+[data-link-type="selector"]::before,
+[data-link-type="maybe"]::before {
+    content: "‘";
+}
+[data-link-type="property"]::after,
+[data-link-type="propdesc"]::after,
+[data-link-type="descriptor"]::after,
+[data-link-type="value"]::after,
+[data-link-type="function"]::after,
+[data-link-type="at-rule"]::after,
+[data-link-type="selector"]::after,
+[data-link-type="maybe"]::after {
+    content: "’";
+}
+
+[data-link-type].production::before,
+[data-link-type].production::after,
+.prod [data-link-type]::before,
+.prod [data-link-type]::after {
+    content: "";
+}
+
+[data-link-type=element],
+[data-link-type=element-attr] {
+    font-family: Menlo, Consolas, "DejaVu Sans Mono", monospace;
+    font-size: .9em;
+}
+[data-link-type=element]::before { content: "<" }
+[data-link-type=element]::after  { content: ">" }
+
+[data-link-type=biblio] {
+    white-space: pre;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --selflink-text: black;
+        --selflink-bg: silver;
+        --selflink-hover-text: white;
+    }
+}
+</style>
+<style>/* Boilerplate: style-colors */
+/* Any --*-text not paired with a --*-bg is assumed to have a transparent bg */
+:root {
+    color-scheme: light dark;
+
+    --text: black;
+    --bg: white;
+
+    --unofficial-watermark: url(https://www.w3.org/StyleSheets/TR/2016/logos/UD-watermark);
+
+    --logo-bg: #1a5e9a;
+    --logo-active-bg: #c00;
+    --logo-text: white;
+
+    --tocnav-normal-text: #707070;
+    --tocnav-normal-bg: var(--bg);
+    --tocnav-hover-text: var(--tocnav-normal-text);
+    --tocnav-hover-bg: #f8f8f8;
+    --tocnav-active-text: #c00;
+    --tocnav-active-bg: var(--tocnav-normal-bg);
+
+    --tocsidebar-text: var(--text);
+    --tocsidebar-bg: #f7f8f9;
+    --tocsidebar-shadow: rgba(0,0,0,.1);
+    --tocsidebar-heading-text: hsla(203,20%,40%,.7);
+
+    --toclink-text: var(--text);
+    --toclink-underline: #3980b5;
+    --toclink-visited-text: var(--toclink-text);
+    --toclink-visited-underline: #054572;
+
+    --heading-text: #005a9c;
+
+    --hr-text: var(--text);
+
+    --algo-border: #def;
+
+    --del-text: red;
+    --del-bg: transparent;
+    --ins-text: #080;
+    --ins-bg: transparent;
+
+    --a-normal-text: #034575;
+    --a-normal-underline: #bbb;
+    --a-visited-text: var(--a-normal-text);
+    --a-visited-underline: #707070;
+    --a-hover-bg: rgba(75%, 75%, 75%, .25);
+    --a-active-text: #c00;
+    --a-active-underline: #c00;
+
+    --blockquote-border: silver;
+    --blockquote-bg: transparent;
+    --blockquote-text: currentcolor;
+
+    --issue-border: #e05252;
+    --issue-bg: #fbe9e9;
+    --issue-text: var(--text);
+    --issueheading-text: #831616;
+
+    --example-border: #e0cb52;
+    --example-bg: #fcfaee;
+    --example-text: var(--text);
+    --exampleheading-text: #574b0f;
+
+    --note-border: #52e052;
+    --note-bg: #e9fbe9;
+    --note-text: var(--text);
+    --noteheading-text: hsl(120, 70%, 30%);
+    --notesummary-underline: silver;
+
+    --assertion-border: #aaa;
+    --assertion-bg: #eee;
+    --assertion-text: black;
+
+    --advisement-border: orange;
+    --advisement-bg: #fec;
+    --advisement-text: var(--text);
+    --advisementheading-text: #b35f00;
+
+    --warning-border: red;
+    --warning-bg: hsla(40,100%,50%,0.95);
+    --warning-text: var(--text);
+
+    --amendment-border: #330099;
+    --amendment-bg: #F5F0FF;
+    --amendment-text: var(--text);
+    --amendmentheading-text: #220066;
+
+    --def-border: #8ccbf2;
+    --def-bg: #def;
+    --def-text: var(--text);
+    --defrow-border: #bbd7e9;
+
+    --datacell-border: silver;
+
+    --indexinfo-text: #707070;
+
+    --indextable-hover-text: black;
+    --indextable-hover-bg: #f7f8f9;
+
+    --outdatedspec-bg: rgba(0, 0, 0, .5);
+    --outdatedspec-text: black;
+    --outdated-bg: maroon;
+    --outdated-text: white;
+    --outdated-shadow: red;
+
+    --editedrec-bg: darkorange;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --text: #ddd;
+        --bg: black;
+
+        --unofficial-watermark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cg fill='%23100808' transform='translate(200 200) rotate(-45) translate(-200 -200)' stroke='%23100808' stroke-width='3'%3E%3Ctext x='50%25' y='220' style='font: bold 70px sans-serif; text-anchor: middle; letter-spacing: 6px;'%3EUNOFFICIAL%3C/text%3E%3Ctext x='50%25' y='305' style='font: bold 70px sans-serif; text-anchor: middle; letter-spacing: 6px;'%3EDRAFT%3C/text%3E%3C/g%3E%3C/svg%3E");
+
+        --logo-bg: #1a5e9a;
+        --logo-active-bg: #c00;
+        --logo-text: white;
+
+        --tocnav-normal-text: #999;
+        --tocnav-normal-bg: var(--bg);
+        --tocnav-hover-text: var(--tocnav-normal-text);
+        --tocnav-hover-bg: #080808;
+        --tocnav-active-text: #f44;
+        --tocnav-active-bg: var(--tocnav-normal-bg);
+
+        --tocsidebar-text: var(--text);
+        --tocsidebar-bg: #080808;
+        --tocsidebar-shadow: rgba(255,255,255,.1);
+        --tocsidebar-heading-text: hsla(203,20%,40%,.7);
+
+        --toclink-text: var(--text);
+        --toclink-underline: #6af;
+        --toclink-visited-text: var(--toclink-text);
+        --toclink-visited-underline: #054572;
+
+        --heading-text: #8af;
+
+        --hr-text: var(--text);
+
+        --algo-border: #456;
+
+        --del-text: #f44;
+        --del-bg: transparent;
+        --ins-text: #4a4;
+        --ins-bg: transparent;
+
+        --a-normal-text: #6af;
+        --a-normal-underline: #555;
+        --a-visited-text: var(--a-normal-text);
+        --a-visited-underline: var(--a-normal-underline);
+        --a-hover-bg: rgba(25%, 25%, 25%, .2);
+        --a-active-text: #f44;
+        --a-active-underline: var(--a-active-text);
+
+        --borderedblock-bg: rgba(255, 255, 255, .05);
+
+        --blockquote-border: silver;
+        --blockquote-bg: var(--borderedblock-bg);
+        --blockquote-text: currentcolor;
+
+        --issue-border: #e05252;
+        --issue-bg: var(--borderedblock-bg);
+        --issue-text: var(--text);
+        --issueheading-text: hsl(0deg, 70%, 70%);
+
+        --example-border: hsl(50deg, 90%, 60%);
+        --example-bg: var(--borderedblock-bg);
+        --example-text: var(--text);
+        --exampleheading-text: hsl(50deg, 70%, 70%);
+
+        --note-border: hsl(120deg, 100%, 35%);
+        --note-bg: var(--borderedblock-bg);
+        --note-text: var(--text);
+        --noteheading-text: hsl(120, 70%, 70%);
+        --notesummary-underline: silver;
+
+        --assertion-border: #444;
+        --assertion-bg: var(--borderedblock-bg);
+        --assertion-text: var(--text);
+
+        --advisement-border: orange;
+        --advisement-bg: #222218;
+        --advisement-text: var(--text);
+        --advisementheading-text: #f84;
+
+        --warning-border: red;
+        --warning-bg: hsla(40,100%,20%,0.95);
+        --warning-text: var(--text);
+
+        --amendment-border: #330099;
+        --amendment-bg: #080010;
+        --amendment-text: var(--text);
+        --amendmentheading-text: #cc00ff;
+
+        --def-border: #8ccbf2;
+        --def-bg: #080818;
+        --def-text: var(--text);
+        --defrow-border: #136;
+
+        --datacell-border: silver;
+
+        --indexinfo-text: #aaa;
+
+        --indextable-hover-text: var(--text);
+        --indextable-hover-bg: #181818;
+
+        --outdatedspec-bg: rgba(255, 255, 255, .5);
+        --outdatedspec-text: black;
+        --outdated-bg: maroon;
+        --outdated-text: white;
+        --outdated-shadow: red;
+
+        --editedrec-bg: darkorange;
+    }
+    /* In case a transparent-bg image doesn't expect to be on a dark bg,
+       which is quite common in practice... */
+    img { background: white; }
+}
+</style>
+<style>/* Boilerplate: style-counters */
+body {
+    counter-reset: example figure issue table;
+}
+.issue {
+    counter-increment: issue;
+}
+.issue:not(.no-marker)::before {
+    content: "Issue " counter(issue);
+}
+
+.example {
+    counter-increment: example;
+}
+.example:not(.no-marker)::before {
+    content: "Example " counter(example);
+}
+.invalid.example:not(.no-marker)::before,
+.illegal.example:not(.no-marker)::before {
+    content: "Invalid Example " counter(example);
+}
+
+figcaption {
+    counter-increment: figure;
+}
+figcaption:not(.no-marker)::before {
+    content: "Figure " counter(figure) " ";
+}
+
+figure.table figcaption {
+    counter-increment: table;
+}
+figure.table figcaption:not(.no-marker)::before {
+    content: "Table " counter(table) " ";
+}
+</style>
+<style>/* Boilerplate: style-dfn-panel */
+:root {
+    --dfnpanel-bg: #ddd;
+    --dfnpanel-text: var(--text);
+    --dfnpanel-target-bg: #ffc;
+    --dfnpanel-target-outline: orange;
+}
+@media (prefers-color-scheme: dark) {
+    :root {
+        --dfnpanel-bg: #222;
+        --dfnpanel-text: var(--text);
+        --dfnpanel-target-bg: #333;
+        --dfnpanel-target-outline: silver;
+    }
+}
+.dfn-panel {
+    position: absolute;
+    z-index: 35;
+    width: 20em;
+    width: 300px;
+    height: auto;
+    max-height: 500px;
+    overflow: auto;
+    padding: 0.5em 0.75em;
+    font: small Helvetica Neue, sans-serif, Droid Sans Fallback;
+    background: var(--dfnpanel-bg);
+    color: var(--dfnpanel-text);
+    border: outset 0.2em;
+    white-space: normal; /* in case it's moved into a pre */
+}
+.dfn-panel:not(.on) { display: none; }
+.dfn-panel * { margin: 0; padding: 0; text-indent: 0; }
+.dfn-panel > b { display: block; }
+.dfn-panel a { color: var(--dfnpanel-text); }
+.dfn-panel a:not(:hover) { text-decoration: none !important; border-bottom: none !important; }
+.dfn-panel a:focus {
+    outline: 5px auto Highlight;
+    outline: 5px auto -webkit-focus-ring-color;
+}
+.dfn-panel > b + b { margin-top: 0.25em; }
+.dfn-panel ul { padding: 0 0 0 1em; list-style: none; }
+.dfn-panel li a {
+    max-width: calc(300px - 1.5em - 1em);
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dfn-panel.activated {
+    display: inline-block;
+    position: fixed;
+    left: 8px;
+    bottom: 2em;
+    margin: 0 auto;
+    max-width: calc(100vw - 1.5em - .4em - .5em);
+    max-height: 30vh;
+    transition: left 1s ease-out, bottom 1s ease-out;
+}
+
+.dfn-panel .link-item:hover {
+    text-decoration: underline;
+}
+.dfn-panel .link-item .copy-icon {
+    opacity: 0;
+}
+.dfn-panel .link-item:hover .copy-icon,
+.dfn-panel .link-item .copy-icon:focus {
+    opacity: 1;
+}
+
+.dfn-panel .copy-icon {
+    display: inline-block;
+    margin-right: 0.5em;
+    width: 0.85em;
+    height: 1em;
+    border-radius: 3px;
+    background-color: #ccc;
+    cursor: pointer;
+}
+
+.dfn-panel .copy-icon .icon {
+    width: 100%;
+    height: 100%;
+    background-color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+.dfn-panel .copy-icon .icon::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 1px solid black;
+    background-color: #ccc;
+    opacity: 0.25;
+    transform: translate(3px, -3px);
+}
+
+.dfn-panel .copy-icon:active .icon::before {
+    opacity: 1;
+}
+
+.dfn-paneled[role="button"] { cursor: help; }
+
+.highlighted {
+    animation: target-fade 3s;
+}
+
+@keyframes target-fade {
+    from {
+        background-color: var(--dfnpanel-target-bg);
+        outline: 5px solid var(--dfnpanel-target-outline);
+    }
+    to {
+        color: var(--a-normal-text);
+        background-color: transparent;
+        outline: transparent;
+    }
+}
+</style>
+<style>/* Boilerplate: style-issues */
+a[href].issue-return {
+    float: right;
+    float: inline-end;
+    color: var(--issueheading-text);
+    font-weight: bold;
+    text-decoration: none;
+}
+</style>
+<style>/* Boilerplate: style-md-lists */
+/* This is a weird hack for me not yet following the commonmark spec
+   regarding paragraph and lists. */
+[data-md] > :first-child {
+    margin-top: 0;
+}
+[data-md] > :last-child {
+    margin-bottom: 0;
+}
+</style>
+<style>/* Boilerplate: style-ref-hints */
+:root {
+    --ref-hint-bg: #ddd;
+    --ref-hint-text: var(--text);
+}
+@media (prefers-color-scheme: dark) {
+    :root {
+        --ref-hint-bg: #222;
+        --ref-hint-text: var(--text);
+    }
+}
+
+.ref-hint {
+    display: inline-block;
+    position: absolute;
+    z-index: 35;
+    width: 20em;
+    width: 300px;
+    height: auto;
+    max-height: 500px;
+    overflow: auto;
+    padding: 0.5em 0.5em;
+    font: small Helvetica Neue, sans-serif, Droid Sans Fallback;
+    background: var(--ref-hint-bg);
+    color: var(--ref-hint-text);
+    border: outset 0.2em;
+    white-space: normal; /* in case it's moved into a pre */
+}
+
+.ref-hint * { margin: 0; padding: 0; text-indent: 0; }
+
+.ref-hint ul { padding: 0 0 0 1em; list-style: none; }
+</style>
+<style>/* Boilerplate: style-selflinks */
+:root {
+    --selflink-text: white;
+    --selflink-bg: gray;
+    --selflink-hover-text: black;
+}
+.heading, .issue, .note, .example, li, dt {
+    position: relative;
+}
+a.self-link {
+    position: absolute;
+    top: 0;
+    left: calc(-1 * (3.5rem - 26px));
+    width: calc(3.5rem - 26px);
+    height: 2em;
+    text-align: center;
+    border: none;
+    transition: opacity .2s;
+    opacity: .5;
+}
+a.self-link:hover {
+    opacity: 1;
+}
+.heading > a.self-link {
+    font-size: 83%;
+}
+.example > a.self-link,
+.note > a.self-link,
+.issue > a.self-link {
+    /* These blocks are overflow:auto, so positioning outside
+       doesn't work. */
+    left: auto;
+    right: 0;
+}
+li > a.self-link {
+    left: calc(-1 * (3.5rem - 26px) - 2em);
+}
+dfn > a.self-link {
+    top: auto;
+    left: auto;
+    opacity: 0;
+    width: 1.5em;
+    height: 1.5em;
+    background: var(--selflink-bg);
+    color: var(--selflink-text);
+    font-style: normal;
+    transition: opacity .2s, background-color .2s, color .2s;
+}
+dfn:hover > a.self-link {
+    opacity: 1;
+}
+dfn > a.self-link:hover {
+    color: var(--selflink-hover-text);
+}
+
+a.self-link::before            { content: "¶"; }
+.heading > a.self-link::before { content: "§"; }
+dfn > a.self-link::before      { content: "#"; }
+</style>
+ <body class="h-entry">
+  <div class="head">
+   <p data-fill-with="logo"><a class="logo" href="https://www.w3.org/">
+    <img alt="W3C" height="48" src="https://www.w3.org/StyleSheets/TR/2021/logos/W3C" width="72">
+</a>
+</p>
+   <h1 class="no-ref p-name" id="title">Extension Service Workers</h1>
+   <p id="w3c-state"><a href="https://www.w3.org/standards/types/#CG-DRAFT">Draft Community Group Report</a>,
+    <time class="dt-updated" datetime="2026-11-02">2 November 2026</time></p>
+   <details open>
+    <summary>More details about this document</summary>
+    <div data-fill-with="spec-metadata">
+     <dl>
+      <dt>This version:
+      <dd><a class="u-url" href="https://w3c.github.io/webextensions/specification/extension-service-workers.html">https://w3c.github.io/webextensions/specification/extension-service-workers.html</a>
+      <dt>Issue Tracking:
+      <dd><a href="https://github.com/w3c/webextensions/issues/">GitHub</a>
+      <dd><a href="#issues-index">Inline In Spec</a>
+      <dt class="editor">Editor:
+      <dd class="editor h-card p-author vcard"><a class="email fn p-name u-email" href="mailto:patrickkettner@google.com">Patrick Kettner</a> (<span class="org p-org">Google</span>)
+     </dl>
+    </div>
+   </details>
+   <div data-fill-with="warning"></div>
+   <p class="copyright" data-fill-with="copyright"><a href="https://www.w3.org/policies/#copyright">Copyright</a> © 2026 the Contributors to the Extension Service Workers Specification, published by the <a href="https://www.w3.org/community/webextensions/">WebExtensions Community Group</a> under the <a href="https://www.w3.org/community/about/agreements/cla/">W3C Community Contributor License Agreement (CLA)</a>.
+A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/">summary</a> is available.
+</p>
+   <hr title="Separator for header">
+  </div>
+  <div class="p-summary" data-fill-with="abstract">
+   <h2 class="heading no-num no-ref no-toc settled" id="abstract"><span class="content">Abstract</span></h2>
+   <p>A WebExtension can declare a service worker as its <a href="https://w3c.github.io/webextensions/specification/#key-background">background</a> context. Because WebExtensions have a permission model and user expectations that differ from those of web content, that service worker has access to capabilities that other service workers do not. This specification defines <a data-link-type="dfn" href="#extension-service-worker" id="ref-for-extension-service-worker">extension service workers</a>, what distinguishes their realms for WebIDL, and the criteria under which a capability is made available to them.</p>
+  </div>
+  <h2 class="heading no-num no-ref no-toc settled" id="sotd"><span class="content">Status of this document</span></h2>
+  <div data-fill-with="status">
+   <p>
+  This specification was published by the <a href="https://www.w3.org/community/webextensions/">WebExtensions Community Group</a>.
+  It is not a W3C Standard nor is it on the W3C Standards Track.
+
+  Please note that under the
+  <a href="https://www.w3.org/community/about/agreements/cla/">W3C Community Contributor License Agreement (CLA)</a>
+  there is a limited opt-out and other conditions apply.
+
+  Learn more about
+  <a href="http://www.w3.org/community/">W3C Community and Business Groups</a>.
+</p>
+   <p></p>
+  </div>
+  <div data-fill-with="at-risk"></div>
+  <nav data-fill-with="table-of-contents" id="toc">
+   <h2 class="no-num no-ref no-toc" id="contents">Table of Contents</h2>
+   <ol class="toc">
+    <li>
+     <a href="#w3c-conformance"><span class="secno"></span> <span class="content">Conformance</span></a>
+     <ol class="toc">
+      <li><a href="#w3c-conventions"><span class="secno"></span> <span class="content">Document conventions</span></a>
+     </ol>
+    <li>
+     <a href="#index"><span class="secno"></span> <span class="content">Index</span></a>
+     <ol class="toc">
+      <li><a href="#index-defined-here"><span class="secno"></span> <span class="content">Terms defined by this specification</span></a>
+      <li><a href="#index-defined-elsewhere"><span class="secno"></span> <span class="content">Terms defined by reference</span></a>
+     </ol>
+    <li>
+     <a href="#references"><span class="secno"></span> <span class="content">References</span></a>
+     <ol class="toc">
+      <li><a href="#normative"><span class="secno"></span> <span class="content">Normative References</span></a>
+      <li><a href="#informative"><span class="secno"></span> <span class="content">Non-Normative References</span></a>
+     </ol>
+    <li><a href="#issues-index"><span class="secno"></span> <span class="content">Issues Index</span></a>
+   </ol>
+  </nav>
+  <main>
+   <section class="non-normative">
+    <h3 class="heading settled" id="introduction"><span class="content">Introduction</span></h3>
+    <p><em>This section is non-normative.</em></p>
+    <p>A WebExtension can declare a <a data-link-type="dfn" href="https://w3c.github.io/ServiceWorker/#dfn-service-worker" id="ref-for-dfn-service-worker">service worker</a> as its
+<a href="https://w3c.github.io/webextensions/specification/#key-background">background</a>
+context. Browsers make some capabilities available in that worker that are
+not available in other <a data-link-type="dfn" href="https://w3c.github.io/ServiceWorker/#dfn-service-worker" id="ref-for-dfn-service-worker①">service workers</a>. This is done where user
+permission is better granted at a different level in the extension permission
+model than the web offers, such as hardware access.</p>
+    <p>Today each such capability is implemented ad hoc, without specification,
+because WebIDL has no way to name "the <a data-link-type="dfn" href="https://w3c.github.io/ServiceWorker/#dfn-service-worker" id="ref-for-dfn-service-worker②">service worker</a> that belongs to an
+extension". The result is that the IDL of the owning specification does not
+match what Chromium, at present the only engine that ships these capabilities
+in <a data-link-type="dfn" href="#extension-service-worker" id="ref-for-extension-service-worker①">extension service workers</a>, implements:</p>
+    <div class="example" id="example-status-quo">
+     <a class="self-link" href="#example-status-quo"></a>
+
+     <table class="data">
+      <thead>
+       <tr>
+        <th>API
+        <th>The IDL says
+        <th>Chromium ships
+        <th>The gap
+      <tbody>
+       <tr>
+        <td>WebUSB <a data-link-type="biblio" href="#biblio-webusb" title="WebUSB Standard">[WEBUSB]</a>
+        <td><code>[Exposed=(Worker,Window)]</code>: every worker, including every
+          <a data-link-type="dfn" href="https://w3c.github.io/ServiceWorker/#dfn-service-worker" id="ref-for-dfn-service-worker③">service worker</a>. Added for <a data-link-type="dfn" href="#extension-service-worker" id="ref-for-extension-service-worker②">extension service workers</a> in
+          <a href="https://github.com/whatwg/usb/pull/221">whatwg/usb#221</a>.
+        <td>Windows, dedicated workers, and the <a data-link-type="dfn" href="#extension-service-worker" id="ref-for-extension-service-worker③">extension service worker</a>.
+        <td>The IDL claims shared workers and all <a data-link-type="dfn" href="https://w3c.github.io/ServiceWorker/#dfn-service-worker" id="ref-for-dfn-service-worker④">service workers</a>. No
+          engine implements that.
+       <tr>
+        <td>WebHID <a data-link-type="biblio" href="#biblio-webhid" title="WebHID Standard">[WEBHID]</a>
+        <td><code>[Exposed=(DedicatedWorker,ServiceWorker,Window)]</code>, with a note
+          that a user agent "<span class="allow-2119">may</span>" limit the
+          <a data-link-type="dfn" href="https://w3c.github.io/ServiceWorker/#dfn-service-worker" id="ref-for-dfn-service-worker⑤">service worker</a> exposure to extension contexts. Added in
+          <a href="https://github.com/whatwg/hid/pull/97">whatwg/hid#97</a>.
+        <td>Windows, dedicated workers, and the <a data-link-type="dfn" href="#extension-service-worker" id="ref-for-extension-service-worker④">extension service worker</a>.
+        <td>The restriction is in a note, not in the IDL.
+       <tr>
+        <td>Clipboard <a data-link-type="biblio" href="#biblio-clipboard-apis" title="Clipboard API and events">[CLIPBOARD-APIS]</a>
+        <td><code>[Exposed=Window]</code>. <a data-link-type="dfn" href="https://w3c.github.io/ServiceWorker/#dfn-service-worker" id="ref-for-dfn-service-worker⑥">Service worker</a> exposure for the web was
+          declined in
+          <a href="https://github.com/w3c/editing/issues/458">w3c/editing#458</a>.
+        <td>The <a data-link-type="dfn" href="#extension-service-worker" id="ref-for-extension-service-worker⑤">extension service worker</a>, without user activation, gated
+          on the extension’s clipboard permissions.
+        <td>No IDL describes the shipped exposure.
+     </table>
+    </div>
+    <p>This specification does not define the lifetime of an
+<a data-link-type="dfn" href="#extension-service-worker" id="ref-for-extension-service-worker⑥">extension service worker</a>, and it does not revisit the processing model of
+<a data-link-type="dfn" href="https://w3c.github.io/ServiceWorker/#dfn-service-worker" id="ref-for-dfn-service-worker⑦">service workers</a>.</p>
+    <p>This specification defines <a data-link-type="dfn" href="#extension-service-worker" id="ref-for-extension-service-worker⑦">extension service workers</a>. To do so it:</p>
+    <ol>
+     <li data-md>
+      <p>Defines the <a data-link-type="dfn" href="#extension-service-worker-realm" id="ref-for-extension-service-worker-realm">extension service worker realm</a>, so that WebIDL can
+expose a construct in <a data-link-type="dfn" href="#extension-service-worker" id="ref-for-extension-service-worker⑧">extension service workers</a> without exposing it
+in other <a data-link-type="dfn" href="https://w3c.github.io/ServiceWorker/#dfn-service-worker" id="ref-for-dfn-service-worker⑧">service workers</a>.</p>
+     <li data-md>
+      <p>Sets the criteria this group applies before a capability is exposed to
+<a data-link-type="dfn" href="#extension-service-worker" id="ref-for-extension-service-worker⑨">extension service workers</a>. New behavior belongs in the feature’s own
+specification and in <a data-link-type="biblio" href="#biblio-service-workers" title="Service Workers Nightly">[SERVICE-WORKERS]</a>. Exposure to
+<a data-link-type="dfn" href="#extension-service-worker" id="ref-for-extension-service-worker①⓪">extension service workers</a> alone is for the cases where that has been
+considered and declined.</p>
+    </ol>
+   </section>
+   <h3 class="heading settled" id="conformance-of-user-agents"><span class="content">Conformance of user agents</span></h3>
+   <p>The requirements in this specification are on user agents that implement
+<a data-link-type="biblio" href="#biblio-service-workers" title="Service Workers Nightly">[SERVICE-WORKERS]</a> and support WebExtensions. They are stated in
+<a href="#exposure-condition">The extension service worker realm</a> and <a href="#security">Security considerations</a>.</p>
+   <p>The criteria in <a href="#exposing">Exposing a capability to extension service workers</a> are applied by this group. They are not
+conformance requirements on any specification or user agent.</p>
+   <h3 class="heading settled" id="extension-service-workers"><span class="content">Extension service workers</span></h3>
+   <p>A WebExtension can declare a <a data-link-type="dfn" href="https://w3c.github.io/ServiceWorker/#dfn-service-worker" id="ref-for-dfn-service-worker⑨">service worker</a> in its
+<a href="https://w3c.github.io/webextensions/specification/#key-background">manifest</a>
+under <code>background.service_worker</code>. The user agent registers it by running
+<a data-link-type="dfn" href="https://w3c.github.io/webextensions/specification/#register-the-background-service-worker" id="ref-for-register-the-background-service-worker">register the background service worker</a> <a data-link-type="biblio" href="#biblio-webextensions" title="Web Extensions">[webextensions]</a>. The resulting
+<a data-link-type="dfn" href="https://w3c.github.io/ServiceWorker/#dfn-service-worker-registration" id="ref-for-dfn-service-worker-registration">service worker registration</a> is the WebExtension’s
+<a data-link-type="dfn" href="https://w3c.github.io/webextensions/specification/#background-service-worker-registration" id="ref-for-background-service-worker-registration">background service worker registration</a>. Its <a data-link-type="dfn" href="https://w3c.github.io/ServiceWorker/#dfn-scope-url" id="ref-for-dfn-scope-url">scope url</a> is the WebExtension’s root URL.</p>
+   <p>The <dfn class="dfn-paneled" data-dfn-type="dfn" data-export data-lt="extension service worker|background service worker" id="extension-service-worker">extension
+service worker</dfn> of a WebExtension is the <a data-link-type="dfn" href="https://w3c.github.io/ServiceWorker/#dfn-active-worker" id="ref-for-dfn-active-worker">active worker</a> of that
+WebExtension’s <a data-link-type="dfn" href="https://w3c.github.io/webextensions/specification/#background-service-worker-registration" id="ref-for-background-service-worker-registration①">background service worker registration</a>. A WebExtension has
+at most one active <a data-link-type="dfn" href="#extension-service-worker" id="ref-for-extension-service-worker①①">extension service worker</a> at a time, and none if its
+manifest has no <code>background.service_worker</code> entry. The extension service
+worker is a <a data-link-type="dfn" href="https://w3c.github.io/webextensions/specification/#privileged-extension-context" id="ref-for-privileged-extension-context">privileged extension context</a>. The <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-origin" id="ref-for-concept-url-origin">origin</a> of its
+<a data-link-type="dfn" href="https://w3c.github.io/ServiceWorker/#dfn-script-url" id="ref-for-dfn-script-url">script url</a> is the <a data-link-type="dfn" href="https://w3c.github.io/webextensions/specification/#dfn-extension-origin" id="ref-for-dfn-extension-origin">extension origin</a>.</p>
+   <p class="note" role="note"><span class="marker">Note:</span> The definition is in terms of the registration rather than a particular
+<a data-link-type="dfn" href="https://w3c.github.io/ServiceWorker/#dfn-service-worker" id="ref-for-dfn-service-worker①⓪">service worker</a> because the <a data-link-type="dfn" href="https://w3c.github.io/ServiceWorker/#dfn-service-worker" id="ref-for-dfn-service-worker①①">service worker</a> is replaced when the
+extension updates, and the registration persists. Every <a data-link-type="dfn" href="https://w3c.github.io/ServiceWorker/#dfn-service-worker" id="ref-for-dfn-service-worker①②">service worker</a> of
+the registration, including one that is still installing, has an
+<a data-link-type="dfn" href="#extension-service-worker-realm" id="ref-for-extension-service-worker-realm①">extension service worker realm</a>, because a worker’s realm is created
+before the worker becomes active.</p>
+   <div class="issue" id="issue-17433001">
+    <a class="self-link" href="#issue-17433001"></a>
+
+    <p>The manifest is the only expected way to register an
+<a data-link-type="dfn" href="#extension-service-worker" id="ref-for-extension-service-worker①②">extension service worker</a>. A document on the <a data-link-type="dfn" href="https://w3c.github.io/webextensions/specification/#dfn-extension-origin" id="ref-for-dfn-extension-origin①">extension origin</a> can
+nevertheless call <code class="idl"><a data-link-type="idl" href="https://w3c.github.io/ServiceWorker/#dom-serviceworkercontainer-register" id="ref-for-dom-serviceworkercontainer-register">register()</a></code> with the
+<a data-link-type="dfn" href="https://w3c.github.io/webextensions/specification/#extension-root-url" id="ref-for-extension-root-url">extension root URL</a> as the scope. Within an origin, <a data-link-type="biblio" href="#biblio-service-workers" title="Service Workers Nightly">[SERVICE-WORKERS]</a>
+identifies a <a data-link-type="dfn" href="https://w3c.github.io/ServiceWorker/#dfn-service-worker-registration" id="ref-for-dfn-service-worker-registration①">service worker registration</a> by its
+<a data-link-type="dfn" href="https://w3c.github.io/ServiceWorker/#dfn-scope-url" id="ref-for-dfn-scope-url①">scope url</a>, so such a call names the
+<a data-link-type="dfn" href="https://w3c.github.io/webextensions/specification/#background-service-worker-registration" id="ref-for-background-service-worker-registration②">background service worker registration</a> and would replace its
+<a data-link-type="dfn" href="https://w3c.github.io/ServiceWorker/#dfn-service-worker" id="ref-for-dfn-service-worker①③">service worker</a> with the script passed to the call.</p>
+    <p>This group needs to decide two things: whether such a registration is
+permitted at all, and, if it is, whether the resulting <a data-link-type="dfn" href="https://w3c.github.io/ServiceWorker/#dfn-service-worker" id="ref-for-dfn-service-worker①④">service worker</a> is
+the <a data-link-type="dfn" href="#extension-service-worker" id="ref-for-extension-service-worker①③">extension service worker</a> under the definition above.</p>
+   </div>
+   <p>An <a data-link-type="dfn" href="#extension-service-worker" id="ref-for-extension-service-worker①④">extension service worker</a> is a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#secure-context" id="ref-for-secure-context">secure context</a>, as
+<a data-link-type="biblio" href="#biblio-service-workers" title="Service Workers Nightly">[SERVICE-WORKERS]</a> requires, because <a data-link-type="biblio" href="#biblio-webextensions" title="Web Extensions">[webextensions]</a> makes each
+<a data-link-type="dfn" href="https://w3c.github.io/webextensions/specification/#extension-scheme" id="ref-for-extension-scheme">extension scheme</a> a scheme the user agent considers to be authenticated in
+the sense of <a data-link-type="biblio" href="#biblio-secure-contexts" title="Secure Contexts">[SECURE-CONTEXTS]</a>.</p>
+   <h3 class="heading settled" id="exposure-condition"><span class="content">The extension service worker realm</span></h3>
+   <p>A <a data-link-type="dfn" href="https://tc39.es/ecma262/multipage/executable-code-and-execution-contexts.html#realm" id="ref-for-realm">realm</a> is an <dfn class="dfn-paneled" data-dfn-type="dfn" data-export id="extension-service-worker-realm">extension service worker realm</dfn> if it was
+created for a <a data-link-type="dfn" href="https://w3c.github.io/ServiceWorker/#dfn-service-worker" id="ref-for-dfn-service-worker①⑤">service worker</a> of a
+<a data-link-type="dfn" href="https://w3c.github.io/webextensions/specification/#background-service-worker-registration" id="ref-for-background-service-worker-registration③">background service worker registration</a>.</p>
+   <p class="note" role="note"><span class="marker">Note:</span> An <a data-link-type="dfn" href="#extension-service-worker-realm" id="ref-for-extension-service-worker-realm②">extension service worker realm</a> is defined by the registration
+the realm was created for, rather than by the realm’s eventual
+<a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-realm-global" id="ref-for-concept-realm-global">global object</a>, because WebIDL decides exposure while the realm’s initial
+objects are being created, before <a data-link-type="biblio" href="#biblio-service-workers" title="Service Workers Nightly">[SERVICE-WORKERS]</a> associates the
+<a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-realm-global" id="ref-for-concept-realm-global①">global object</a> with its <a data-link-type="dfn" href="https://w3c.github.io/ServiceWorker/#dfn-service-worker" id="ref-for-dfn-service-worker①⑥">service worker</a>.</p>
+   <p>The <a data-link-type="dfn" href="#extension-service-worker-realm" id="ref-for-extension-service-worker-realm③">extension service worker realm</a> is meant to be used as a condition
+on the <code>ServiceWorker</code> entry of a construct’s <a data-link-type="dfn" href="https://webidl.spec.whatwg.org/#dfn-exposure-set" id="ref-for-dfn-exposure-set">exposure set</a> in the
+[<code class="idl"><a data-link-type="idl" href="https://webidl.spec.whatwg.org/#Exposed" id="ref-for-Exposed">Exposed</a></code>] extended attribute. The construct is then <a data-link-type="dfn" href="https://webidl.spec.whatwg.org/#dfn-exposed" id="ref-for-dfn-exposed">exposed</a> in the
+<a data-link-type="dfn" href="#extension-service-worker-realm" id="ref-for-extension-service-worker-realm④">extension service worker realm</a> and not in other <a data-link-type="dfn" href="https://w3c.github.io/ServiceWorker/#dfn-service-worker" id="ref-for-dfn-service-worker①⑦">service workers</a>.
+Entries for other <a data-link-type="dfn" href="https://webidl.spec.whatwg.org/#dfn-global-name" id="ref-for-dfn-global-name">global names</a> are unaffected. A construct whose
+<a data-link-type="dfn" href="https://webidl.spec.whatwg.org/#dfn-exposure-set" id="ref-for-dfn-exposure-set①">exposure set</a> names <code>Worker</code>, which covers every worker global, lists
+<code>DedicatedWorker</code> and <code>ServiceWorker</code> separately so that the condition can be
+placed on the latter alone.</p>
+   <p>A user agent must not treat the presence of a construct in a <a data-link-type="dfn" href="https://tc39.es/ecma262/multipage/executable-code-and-execution-contexts.html#realm" id="ref-for-realm①">realm</a> as
+authorization to use the capability it provides. The extension’s permissions
+are checked on each use, independently of exposure, as described in
+<a href="#security">Security considerations</a>.</p>
+   <p class="issue" id="issue-8bc9d7ba"><a class="self-link" href="#issue-8bc9d7ba"></a> WebIDL does not currently allow a condition on an individual entry of
+an <a data-link-type="dfn" href="https://webidl.spec.whatwg.org/#dfn-exposure-set" id="ref-for-dfn-exposure-set②">exposure set</a>. Its exposure conditions ([<code class="idl"><a data-link-type="idl" href="https://webidl.spec.whatwg.org/#SecureContext" id="ref-for-SecureContext">SecureContext</a></code>] and
+[<code class="idl"><a data-link-type="idl" href="https://webidl.spec.whatwg.org/#CrossOriginIsolated" id="ref-for-CrossOriginIsolated">CrossOriginIsolated</a></code>]) apply to a whole construct. A proposal to WebIDL
+is being prepared. Until WebIDL accepts a mechanism, no specification can
+reference the <a data-link-type="dfn" href="#extension-service-worker-realm" id="ref-for-extension-service-worker-realm⑤">extension service worker realm</a> from IDL, and
+<a href="#current-exposures">Current exposures</a> describes intended exposure.</p>
+   <h3 class="heading settled" id="exposing"><span class="content">Exposing a capability to extension service workers</span></h3>
+   <h4 class="heading settled" id="criteria"><span class="content">Criteria</span></h4>
+   <p>When a capability is wanted in <a data-link-type="dfn" href="#extension-service-worker" id="ref-for-extension-service-worker①⑤">extension service workers</a>, this group
+works through the following options in order and stops at the first that
+applies.</p>
+   <ol>
+    <li data-md>
+     <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-lt="exposure to all service workers" data-noexport id="exposure-to-all-service-workers">Expose it to all
+<a data-link-type="dfn" href="https://w3c.github.io/ServiceWorker/#dfn-service-worker" id="ref-for-dfn-service-worker①⑧">service workers</a></dfn>. The group asks the specification that owns
+the construct to add <code>ServiceWorker</code> (or <code>Worker</code>) to its
+<a data-link-type="dfn" href="https://webidl.spec.whatwg.org/#dfn-exposure-set" id="ref-for-dfn-exposure-set③">exposure set</a>. If the feature needs the worker to be started, kept
+alive, or notified, the owning specification uses the extension points
+of <a data-link-type="biblio" href="#biblio-service-workers" title="Service Workers Nightly">[SERVICE-WORKERS]</a>: a <a data-link-type="dfn" href="https://w3c.github.io/ServiceWorker/#dfn-functional-events" id="ref-for-dfn-functional-events">functional event</a>, an event handler on
+<code class="idl"><a data-link-type="idl" href="https://w3c.github.io/ServiceWorker/#serviceworkerglobalscope" id="ref-for-serviceworkerglobalscope">ServiceWorkerGlobalScope</a></code>, and <a data-link-type="dfn" href="https://w3c.github.io/ServiceWorker/#fire-functional-event" id="ref-for-fire-functional-event">Fire Functional Event</a>. If those
+extension points are insufficient, the missing hook is proposed to
+<a data-link-type="biblio" href="#biblio-service-workers" title="Service Workers Nightly">[SERVICE-WORKERS]</a>.</p>
+     <div class="example" id="example-all-workers-first"><a class="self-link" href="#example-all-workers-first"></a>
+The <code>CSS</code> namespace is not <a data-link-type="dfn" href="https://webidl.spec.whatwg.org/#dfn-exposed" id="ref-for-dfn-exposed①">exposed</a> in workers. An extension wants
+<code>CSS.supports()</code> for feature detection in its
+<a data-link-type="dfn" href="#extension-service-worker" id="ref-for-extension-service-worker①⑥">extension service worker</a>
+(<a href="https://github.com/w3c/webextensions/issues/1151">issue
+#1151</a>). The feature needs neither a document nor a prompt, so
+<a data-link-type="dfn" href="#exposure-to-all-service-workers" id="ref-for-exposure-to-all-service-workers">exposure to all service workers</a> applies: <a data-link-type="biblio" href="#biblio-cssom" title="CSS Object Model (CSSOM)">[CSSOM]</a> exposes the
+namespace to all workers, as
+<a href="https://github.com/w3c/csswg-drafts/issues/14229">csswg-drafts#14229</a>
+proposes.
+</div>
+    <li data-md>
+     <p>Among <a data-link-type="dfn" href="https://w3c.github.io/ServiceWorker/#dfn-service-worker" id="ref-for-dfn-service-worker①⑨">service workers</a>,
+<dfn class="dfn-paneled" data-dfn-type="dfn" data-lt="exposure to extension service workers only" data-noexport id="exposure-to-extension-service-workers-only">expose it to
+<a data-link-type="dfn" href="#extension-service-worker" id="ref-for-extension-service-worker①⑦">extension service workers</a> only</dfn>. The condition is a public
+record from the group that owns the construct. The record either
+accepts an exposure intended for <a data-link-type="dfn" href="#extension-service-worker" id="ref-for-extension-service-worker①⑧">extension service workers</a> or
+declines to expose the construct to all <a data-link-type="dfn" href="https://w3c.github.io/ServiceWorker/#dfn-service-worker" id="ref-for-dfn-service-worker②⓪">service workers</a> for a
+reason the web cannot remove: the construct needs a chooser, a prompt,
+<a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/interaction.html#transient-activation" id="ref-for-transient-activation">transient activation</a>, or a permission that web content cannot hold
+without a document. In either case an extension permission takes the
+place of that gate.</p>
+     <p>The owning specification limits the <code>ServiceWorker</code> entry of the
+construct’s <a data-link-type="dfn" href="https://webidl.spec.whatwg.org/#dfn-exposure-set" id="ref-for-dfn-exposure-set④">exposure set</a> to the <a data-link-type="dfn" href="#extension-service-worker-realm" id="ref-for-extension-service-worker-realm⑥">extension service worker realm</a>
+and calls the <a data-link-type="dfn" href="https://w3c.github.io/webextensions/specification/#extension-permission-check" id="ref-for-extension-permission-check">extension permission check</a> where its algorithms would
+otherwise prompt or consult <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/interaction.html#transient-activation" id="ref-for-transient-activation①">transient activation</a>. Only the
+declaration that owns an interface can widen its <a data-link-type="dfn" href="https://webidl.spec.whatwg.org/#dfn-exposure-set" id="ref-for-dfn-exposure-set⑤">exposure set</a>.</p>
+     <div class="example" id="example-declined-for-the-web"><a class="self-link" href="#example-declined-for-the-web"></a>
+<a href="https://github.com/w3c/editing/issues/458">w3c/editing#458</a>
+asked the Web Editing Working Group to expose <code>navigator.clipboard</code> in
+<a data-link-type="dfn" href="https://w3c.github.io/ServiceWorker/#dfn-service-worker" id="ref-for-dfn-service-worker②①">service workers</a>. The group asked for web use cases and noted that
+user activation is bound to a <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/nav-history-apis.html#window" id="ref-for-window">Window</a></code> and that it would not pursue
+clipboard access without a focused document and a user-visible
+affordance. The request was not taken further for the web. These
+reasons are intrinsic to the web, so
+<a data-link-type="dfn" href="#exposure-to-extension-service-workers-only" id="ref-for-exposure-to-extension-service-workers-only">exposure to extension service workers only</a> applies: an extension’s
+<code>clipboardRead</code> and <code>clipboardWrite</code> permissions take the place of the
+gate.
+</div>
+   </ol>
+   <p>Neither <a data-link-type="dfn" href="#exposure-to-all-service-workers" id="ref-for-exposure-to-all-service-workers①">exposure to all service workers</a> nor
+<a data-link-type="dfn" href="#exposure-to-extension-service-workers-only" id="ref-for-exposure-to-extension-service-workers-only①">exposure to extension service workers only</a> is met by using <code>Worker</code> or
+<code>ServiceWorker</code> in an <a data-link-type="dfn" href="https://webidl.spec.whatwg.org/#dfn-exposure-set" id="ref-for-dfn-exposure-set⑥">exposure set</a> to mean "<a data-link-type="dfn" href="#extension-service-worker" id="ref-for-extension-service-worker①⑨">extension service workers</a>"
+and narrowing the exposure in prose, in a note, or by leaving it to the
+user agent.</p>
+   <h4 class="heading settled" id="owning-spec-defines"><span class="content">What the owning specification defines</span></h4>
+   <p>A specification that exposes a construct to <a data-link-type="dfn" href="#extension-service-worker" id="ref-for-extension-service-worker②⓪">extension service workers</a>
+defines the following.</p>
+   <dl>
+    <dt data-md>The exposure.
+    <dd data-md>
+     <p>The constructs whose <code>ServiceWorker</code> exposure is limited to the
+<a data-link-type="dfn" href="#extension-service-worker-realm" id="ref-for-extension-service-worker-realm⑦">extension service worker realm</a>, including every <code>partial interface</code>
+or member through which the construct is reached, such as a member added
+to <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/workers.html#workernavigator" id="ref-for-workernavigator">WorkerNavigator</a></code>. If the construct
+is also meant to be available in the extension’s windows or dedicated
+workers, those <a data-link-type="dfn" href="https://webidl.spec.whatwg.org/#dfn-global-name" id="ref-for-dfn-global-name①">global names</a> appear in the same declarations.</p>
+    <dt data-md>User-facing operations.
+    <dd data-md>
+     <p>Any operation that presents a chooser, a prompt, or other user interface,
+or that requires <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/interaction.html#transient-activation" id="ref-for-transient-activation②">transient activation</a>, stays <code>[Exposed=Window]</code>. If
+such an operation is needed in a worker, what replaces the user interface
+and the activation.</p>
+    <dt data-md>Document assumptions.
+    <dd data-md>
+     <p>For every algorithm step that consults <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/interaction.html#transient-activation" id="ref-for-transient-activation③">transient activation</a>, the
+<a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-relevant-global" id="ref-for-concept-relevant-global">relevant global object</a>’s associated <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document">Document</a></code>, a
+<a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/document-sequences.html#browsing-context" id="ref-for-browsing-context">browsing context</a>, or a top-level origin, what happens when the
+<a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-relevant-global" id="ref-for-concept-relevant-global①">relevant global object</a> is that of an <a data-link-type="dfn" href="#extension-service-worker" id="ref-for-extension-service-worker②①">extension service worker</a>,
+which has none of these.</p>
+    <dt data-md>The permission.
+    <dd data-md>
+     <p>Which manifest permission, host permission, or runtime-granted permission
+the <a data-link-type="dfn" href="https://w3c.github.io/webextensions/specification/#extension-permission-check" id="ref-for-extension-permission-check①">extension permission check</a> consults for the feature, in terms of
+the permission model of <a data-link-type="biblio" href="#biblio-webextensions" title="Web Extensions">[webextensions]</a>.</p>
+    <dt data-md>Lifetime.
+    <dd data-md>
+     <p>Whether, and how, pending work keeps the worker alive and whether any
+event starts it, using <code class="idl"><a data-link-type="idl" href="https://w3c.github.io/ServiceWorker/#extendableevent" id="ref-for-extendableevent">ExtendableEvent</a></code> and <a data-link-type="dfn" href="https://w3c.github.io/ServiceWorker/#dfn-functional-events" id="ref-for-dfn-functional-events①">functional events</a> from
+<a data-link-type="biblio" href="#biblio-service-workers" title="Service Workers Nightly">[SERVICE-WORKERS]</a>, without assuming the worker stays alive longer than
+<a data-link-type="biblio" href="#biblio-service-workers" title="Service Workers Nightly">[SERVICE-WORKERS]</a> allows.</p>
+   </dl>
+   <h4 class="heading settled" id="current-exposures"><span class="content">Current exposures</span></h4>
+   <p>For WebUSB and WebHID the owning specifications accepted exposure for
+<a data-link-type="dfn" href="#extension-service-worker" id="ref-for-extension-service-worker②②">extension service workers</a>
+(<a href="https://github.com/whatwg/usb/pull/221">whatwg/usb#221</a>,
+<a href="https://github.com/whatwg/usb/pull/224">whatwg/usb#224</a>,
+<a href="https://github.com/whatwg/hid/pull/97">whatwg/hid#97</a>). For the
+Clipboard API the Web Editing Working Group confirmed that it does not wish
+to expose the API to all <a data-link-type="dfn" href="https://w3c.github.io/ServiceWorker/#dfn-service-worker" id="ref-for-dfn-service-worker②②">service workers</a>
+(<a href="https://github.com/w3c/editing/issues/458">w3c/editing#458</a>),
+and the exposure awaits the Web Editing Working Group attaching the
+condition.</p>
+   <p>Gecko and WebKit have no construct in this category. Gecko does not ship
+<a data-link-type="dfn" href="#extension-service-worker" id="ref-for-extension-service-worker②③">extension service workers</a> by default. WebKit runs
+<a data-link-type="dfn" href="#extension-service-worker" id="ref-for-extension-service-worker②④">extension service workers</a> and injects the <code>browser</code> namespace into them
+by script, but exposes no web platform interface in them beyond what the
+owning specification’s IDL says.</p>
+   <table class="data">
+    <thead>
+     <tr>
+      <th>Construct
+      <th>Owning specification today
+      <th>Chromium
+      <th>Gecko
+      <th>WebKit
+      <th>Intended exposure
+    <tbody>
+     <tr>
+      <td><code class="idl"><a data-link-type="idl" href="https://usb.spec.whatwg.org/#usb" id="ref-for-usb">USB</a></code>, <code>WorkerNavigator.usb</code> and the <code>USB*</code> interfaces
+      <td><code>[Exposed=(Worker,Window)]</code> <a data-link-type="biblio" href="#biblio-webusb" title="WebUSB Standard">[WEBUSB]</a>, since
+          <a href="https://github.com/whatwg/usb/pull/221">whatwg/usb#221</a>
+      <td>Windows, dedicated workers and <a data-link-type="dfn" href="#extension-service-worker" id="ref-for-extension-service-worker②⑤">extension service workers</a>. Not
+          shared workers, not other <a data-link-type="dfn" href="https://w3c.github.io/ServiceWorker/#dfn-service-worker" id="ref-for-dfn-service-worker②③">service workers</a>. <code>connect</code> and
+          <code>disconnect</code> start the extension’s worker.
+      <td>Not implemented.
+      <td>Not implemented.
+      <td><code>Window</code> and <code>DedicatedWorker</code> unconditionally, and <code>ServiceWorker</code>
+          in the <a data-link-type="dfn" href="#extension-service-worker-realm" id="ref-for-extension-service-worker-realm⑧">extension service worker realm</a> only. <code>connect</code> and
+          <code>disconnect</code> as <a data-link-type="dfn" href="https://w3c.github.io/ServiceWorker/#dfn-functional-events" id="ref-for-dfn-functional-events②">functional events</a>.
+     <tr>
+      <td><code class="idl"><a data-link-type="idl" href="https://hid.spec.whatwg.org/#dom-hid" id="ref-for-dom-hid">HID</a></code>, <code>WorkerNavigator.hid</code> and the <code>HID*</code> interfaces
+      <td><code>[Exposed=(DedicatedWorker,ServiceWorker,Window)]</code> with a note that
+          user agents may expose it only in extension contexts <a data-link-type="biblio" href="#biblio-webhid" title="WebHID Standard">[WEBHID]</a>,
+          since <a href="https://github.com/whatwg/hid/pull/97">whatwg/hid#97</a>
+      <td>Windows, dedicated workers and <a data-link-type="dfn" href="#extension-service-worker" id="ref-for-extension-service-worker②⑥">extension service workers</a>.
+      <td>Not implemented.
+      <td>Not implemented.
+      <td><code>Window</code> and <code>DedicatedWorker</code> unconditionally, and <code>ServiceWorker</code>
+          in the <a data-link-type="dfn" href="#extension-service-worker-realm" id="ref-for-extension-service-worker-realm⑨">extension service worker realm</a> only, replacing the note.
+          <code>connect</code> and <code>disconnect</code> as <a data-link-type="dfn" href="https://w3c.github.io/ServiceWorker/#dfn-functional-events" id="ref-for-dfn-functional-events③">functional events</a>.
+     <tr>
+      <td><code class="idl"><a data-link-type="idl" href="https://w3c.github.io/clipboard-apis/#clipboard" id="ref-for-clipboard">Clipboard</a></code>, <code class="idl"><a data-link-type="idl" href="https://w3c.github.io/clipboard-apis/#clipboarditem" id="ref-for-clipboarditem">ClipboardItem</a></code> and <code>WorkerNavigator.clipboard</code>
+      <td><code>[Exposed=Window]</code> only <a data-link-type="biblio" href="#biblio-clipboard-apis" title="Clipboard API and events">[CLIPBOARD-APIS]</a>
+      <td>Exposed in <a data-link-type="dfn" href="#extension-service-worker" id="ref-for-extension-service-worker②⑦">extension service workers</a>, with no
+          <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/interaction.html#transient-activation" id="ref-for-transient-activation④">transient activation</a> requirement. Writes are gated per call on
+          the extension’s <code>clipboardWrite</code> permission.
+      <td><code>[Exposed=Window]</code>, as specified.
+      <td><code>[Exposed=Window]</code>, as specified. Background clipboard access goes
+          through an offscreen document.
+      <td><code>ServiceWorker</code> in the <a data-link-type="dfn" href="#extension-service-worker-realm" id="ref-for-extension-service-worker-realm①⓪">extension service worker realm</a> only, on
+          <code class="idl"><a data-link-type="idl" href="https://w3c.github.io/clipboard-apis/#clipboard" id="ref-for-clipboard①">Clipboard</a></code>, <code class="idl"><a data-link-type="idl" href="https://w3c.github.io/clipboard-apis/#clipboarditem" id="ref-for-clipboarditem①">ClipboardItem</a></code> and a <code>WorkerNavigator</code> partial.
+          The <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/interaction.html#transient-activation" id="ref-for-transient-activation⑤">transient activation</a> check replaced by the
+          <a data-link-type="dfn" href="https://w3c.github.io/webextensions/specification/#extension-permission-check" id="ref-for-extension-permission-check②">extension permission check</a> for <code>clipboardRead</code> or
+          <code>clipboardWrite</code> on each call. Requires a change to
+          <a data-link-type="biblio" href="#biblio-clipboard-apis" title="Clipboard API and events">[CLIPBOARD-APIS]</a>.
+   </table>
+   <p class="issue" id="issue-4802b145"><a class="self-link" href="#issue-4802b145"></a> <a data-link-type="biblio" href="#biblio-webextensions-browser-global" title="window.browser">[webextensions-browser-global]</a> declares
+<code>partial interface ServiceWorkerGlobalScope { attribute Browser browser; }</code>,
+which, read literally, exposes <code class="idl"><a data-link-type="idl" href="https://w3c.github.io/webextensions/specification/window.browser.html#browser-interface" id="ref-for-browser-interface">Browser</a></code> in every <a data-link-type="dfn" href="https://w3c.github.io/ServiceWorker/#dfn-service-worker" id="ref-for-dfn-service-worker②④">service worker</a>. The
+<code>ServiceWorker</code> entry of that partial’s <a data-link-type="dfn" href="https://webidl.spec.whatwg.org/#dfn-exposure-set" id="ref-for-dfn-exposure-set⑦">exposure set</a> should be limited to
+the <a data-link-type="dfn" href="#extension-service-worker-realm" id="ref-for-extension-service-worker-realm①①">extension service worker realm</a> once WebIDL supports it.</p>
+   <h3 class="heading settled" id="security"><span class="content">Security considerations</span></h3>
+   <p>Exposing a construct in an <a data-link-type="dfn" href="#extension-service-worker" id="ref-for-extension-service-worker②⑧">extension service worker</a> gives extension code
+headless access to a capability that the web gates on one or more of a
+document, a user gesture, and a prompt. The extension permission model of
+<a data-link-type="biblio" href="#biblio-webextensions" title="Web Extensions">[webextensions]</a> takes the place of those gates: the user consents when the
+permission is granted, at install time or at run time, and can withdraw it.</p>
+   <p>Where an algorithm of the owning specification would prompt, consult
+<a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/interaction.html#transient-activation" id="ref-for-transient-activation⑥">transient activation</a>, or evaluate a document’s permissions policy, in an
+<a data-link-type="dfn" href="#extension-service-worker" id="ref-for-extension-service-worker②⑨">extension service worker</a> it instead runs the
+<a data-link-type="dfn" href="https://w3c.github.io/webextensions/specification/#extension-permission-check" id="ref-for-extension-permission-check③">extension permission check</a> for the feature. A prompt is never shown from
+an <a data-link-type="dfn" href="#extension-service-worker" id="ref-for-extension-service-worker③⓪">extension service worker</a>, and <a data-link-type="biblio" href="#biblio-permissions-policy" title="Permissions Policy">[PERMISSIONS-POLICY]</a>, which defines no
+policy for a <a data-link-type="dfn" href="https://w3c.github.io/ServiceWorker/#dfn-service-worker" id="ref-for-dfn-service-worker②⑤">service worker</a>’s settings object, is not consulted.</p>
+   <p>The user agent must run the <a data-link-type="dfn" href="https://w3c.github.io/webextensions/specification/#extension-permission-check" id="ref-for-extension-permission-check④">extension permission check</a> on each use of the
+capability, so that a permission revoked while the worker is running takes
+effect on the next use.</p>
+   <p>The user agent must make use of such a capability from an
+<a data-link-type="dfn" href="#extension-service-worker" id="ref-for-extension-service-worker③①">extension service worker</a> attributable to the extension in its user
+interface, since the tab-level indicators that accompany the capability in a
+window are not available.</p>
+   <p>Whether an <a data-link-type="dfn" href="#extension-service-worker" id="ref-for-extension-service-worker③②">extension service worker</a> runs in a private browsing session,
+and with which granted permissions, is governed by <a data-link-type="biblio" href="#biblio-webextensions" title="Web Extensions">[webextensions]</a>.</p>
+   <h3 class="heading settled" id="privacy"><span class="content">Privacy considerations</span></h3>
+   <p>This specification exposes nothing to web content. An
+<a data-link-type="dfn" href="#extension-service-worker-realm" id="ref-for-extension-service-worker-realm①②">extension service worker realm</a> belongs only to an
+<a data-link-type="dfn" href="#extension-service-worker" id="ref-for-extension-service-worker③③">extension service worker</a>, whose script already runs with the extension’s
+permissions. What the headless path removes is the user
+gesture and the visible surface that accompany the same capability in a
+window, which is why <a href="#security">Security considerations</a> requires use to be attributable to the
+extension.</p>
+  </main>
+  <div data-fill-with="conformance">
+   <h2 class="heading no-num no-ref settled" id="w3c-conformance"><span class="content">Conformance</span></h2>
+   <h3 class="heading no-num no-ref settled" id="w3c-conventions"><span class="content">Document conventions</span></h3>
+   <p>Conformance requirements are expressed
+    with a combination of descriptive assertions
+    and RFC 2119 terminology.
+    The key words “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and “OPTIONAL”
+    in the normative parts of this document
+    are to be interpreted as described in RFC 2119.
+    However, for readability,
+    these words do not appear in all uppercase letters in this specification.
+
+    </p>
+   <p>All of the text of this specification is normative
+    except sections explicitly marked as non-normative, examples, and notes. <a data-link-type="biblio" href="#biblio-rfc2119" title="Key words for use in RFCs to Indicate Requirement Levels">[RFC2119]</a>
+
+    </p>
+   <p>Examples in this specification are introduced with the words “for example”
+    or are set apart from the normative text
+    with <code>class="example"</code>,
+    like this:
+
+    </p>
+   <div class="example" id="w3c-example">
+    <a class="self-link" href="#w3c-example"></a>
+        
+    <p>This is an example of an informative example.
+    </p>
+   </div>
+   <p>Informative notes begin with the word “Note”
+    and are set apart from the normative text
+    with <code>class="note"</code>,
+    like this:
+
+    </p>
+   <p class="note" role="note">Note, this is an informative note.</p>
+  </div>
+  <script src="https://www.w3.org/scripts/TR/2021/fixup.js"></script>
+  <h2 class="heading no-num no-ref settled" id="index"><span class="content">Index</span></h2>
+  <h3 class="heading no-num no-ref settled" id="index-defined-here"><span class="content">Terms defined by this specification</span></h3>
+  <ul class="index">
+   <li><a href="#extension-service-worker">background service worker</a><span>, in § Unnumbered section</span>
+   <li><a href="#exposure-to-all-service-workers">exposure to all service workers</a><span>, in § Unnumbered section</span>
+   <li><a href="#exposure-to-extension-service-workers-only">exposure to extension service workers only</a><span>, in § Unnumbered section</span>
+   <li><a href="#extension-service-worker">extension service worker</a><span>, in § Unnumbered section</span>
+   <li><a href="#extension-service-worker-realm">extension service worker realm</a><span>, in § Unnumbered section</span>
+  </ul>
+  <h3 class="heading no-num no-ref settled" id="index-defined-elsewhere"><span class="content">Terms defined by reference</span></h3>
+  <ul class="index">
+   <li>
+    <a data-link-type="biblio">[CLIPBOARD-APIS]</a> defines the following terms:
+    <ul>
+     <li><span class="dfn-paneled" id="9db5bc57">Clipboard</span>
+     <li><span class="dfn-paneled" id="ff69e85f">ClipboardItem</span>
+    </ul>
+   <li>
+    <a data-link-type="biblio">[DOM]</a> defines the following terms:
+    <ul>
+     <li><span class="dfn-paneled" id="85394472">Document</span>
+    </ul>
+   <li>
+    <a data-link-type="biblio">[ECMASCRIPT]</a> defines the following terms:
+    <ul>
+     <li><span class="dfn-paneled" id="a5f015e3">realm</span>
+    </ul>
+   <li>
+    <a data-link-type="biblio">[HID]</a> defines the following terms:
+    <ul>
+     <li><span class="dfn-paneled" id="3e84248c">HID</span>
+    </ul>
+   <li>
+    <a data-link-type="biblio">[HTML]</a> defines the following terms:
+    <ul>
+     <li><span class="dfn-paneled" id="5d7209e9">Window</span>
+     <li><span class="dfn-paneled" id="a4785085">WorkerNavigator</span>
+     <li><span class="dfn-paneled" id="0d0390b4">browsing context</span>
+     <li><span class="dfn-paneled" id="168f1b6e">global object</span>
+     <li><span class="dfn-paneled" id="e99bd18e">relevant global object</span>
+     <li><span class="dfn-paneled" id="65181da8">secure context</span>
+     <li><span class="dfn-paneled" id="47fe679e">transient activation</span>
+    </ul>
+   <li>
+    <a data-link-type="biblio">[SERVICE-WORKERS]</a> defines the following terms:
+    <ul>
+     <li><span class="dfn-paneled" id="76b107de">ExtendableEvent</span>
+     <li><span class="dfn-paneled" id="86d2a717">ServiceWorkerGlobalScope</span>
+     <li><span class="dfn-paneled" id="5102209a">active worker</span>
+     <li><span class="dfn-paneled" id="70736ed4">Fire Functional Event</span>
+     <li><span class="dfn-paneled" id="d0f8d259">functional events</span>
+     <li><span class="dfn-paneled" id="5736088e">register(scriptURL)</span>
+     <li><span class="dfn-paneled" id="fc627dec">scope url</span>
+     <li><span class="dfn-paneled" id="3f9ec3a3">script url</span>
+     <li><span class="dfn-paneled" id="c60ed63a">service worker</span>
+     <li><span class="dfn-paneled" id="02406c7f">service worker registration</span>
+    </ul>
+   <li>
+    <a data-link-type="biblio">[URL]</a> defines the following terms:
+    <ul>
+     <li><span class="dfn-paneled" id="959ad97b">origin</span>
+    </ul>
+   <li>
+    <a data-link-type="biblio">[USB]</a> defines the following terms:
+    <ul>
+     <li><span class="dfn-paneled" id="612fa802">USB</span>
+    </ul>
+   <li>
+    <a data-link-type="biblio">[WEBEXTENSIONS]</a> defines the following terms:
+    <ul>
+     <li><span class="dfn-paneled" id="2bebe2c9">background service worker registration</span>
+     <li><span class="dfn-paneled" id="5b522ac1">extension origin</span>
+     <li><span class="dfn-paneled" id="b5034374">extension permission check</span>
+     <li><span class="dfn-paneled" id="86edd5d5">extension root URL</span>
+     <li><span class="dfn-paneled" id="221006de">extension scheme</span>
+     <li><span class="dfn-paneled" id="370c31a2">privileged extension context</span>
+     <li><span class="dfn-paneled" id="90f19891">register the background service worker</span>
+    </ul>
+   <li>
+    <a data-link-type="biblio">[WEBEXTENSIONS-BROWSER-GLOBAL]</a> defines the following terms:
+    <ul>
+     <li><span class="dfn-paneled" id="7d294a6c">Browser</span>
+    </ul>
+   <li>
+    <a data-link-type="biblio">[WEBIDL]</a> defines the following terms:
+    <ul>
+     <li><span class="dfn-paneled" id="cc2141c1">CrossOriginIsolated</span>
+     <li><span class="dfn-paneled" id="889e932f">Exposed</span>
+     <li><span class="dfn-paneled" id="b75bb3bd">SecureContext</span>
+     <li><span class="dfn-paneled" id="25c36209">exposed</span>
+     <li><span class="dfn-paneled" id="631ad9e6">exposure set</span>
+     <li><span class="dfn-paneled" id="e3c5ca09">global names</span>
+    </ul>
+  </ul>
+  <h2 class="heading no-num no-ref settled" id="references"><span class="content">References</span></h2>
+  <h3 class="heading no-num no-ref settled" id="normative"><span class="content">Normative References</span></h3>
+  <dl>
+   <dt id="biblio-clipboard-apis">[CLIPBOARD-APIS]
+   <dd>Rakesh Goulikar; Rohan Raja. <a href="https://w3c.github.io/clipboard-apis/"><cite>Clipboard API and events</cite></a>. URL: <a href="https://w3c.github.io/clipboard-apis/">https://w3c.github.io/clipboard-apis/</a>
+   <dt id="biblio-dom">[DOM]
+   <dd>Anne van Kesteren. <a href="https://dom.spec.whatwg.org/"><cite>DOM Standard</cite></a>. Living Standard. URL: <a href="https://dom.spec.whatwg.org/">https://dom.spec.whatwg.org/</a>
+   <dt id="biblio-ecmascript">[ECMASCRIPT]
+   <dd><a href="https://tc39.es/ecma262/multipage/"><cite>ECMAScript Language Specification</cite></a>. URL: <a href="https://tc39.es/ecma262/multipage/">https://tc39.es/ecma262/multipage/</a>
+   <dt id="biblio-html">[HTML]
+   <dd>Anne van Kesteren; et al. <a href="https://html.spec.whatwg.org/multipage/"><cite>HTML Standard</cite></a>. Living Standard. URL: <a href="https://html.spec.whatwg.org/multipage/">https://html.spec.whatwg.org/multipage/</a>
+   <dt id="biblio-rfc2119">[RFC2119]
+   <dd>S. Bradner. <a href="https://datatracker.ietf.org/doc/html/rfc2119"><cite>Key words for use in RFCs to Indicate Requirement Levels</cite></a>. March 1997. Best Current Practice. URL: <a href="https://datatracker.ietf.org/doc/html/rfc2119">https://datatracker.ietf.org/doc/html/rfc2119</a>
+   <dt id="biblio-service-workers">[SERVICE-WORKERS]
+   <dd>Monica CHINTALA; Yoshisato Yanagisawa. <a href="https://w3c.github.io/ServiceWorker/"><cite>Service Workers Nightly</cite></a>. URL: <a href="https://w3c.github.io/ServiceWorker/">https://w3c.github.io/ServiceWorker/</a>
+   <dt id="biblio-url">[URL]
+   <dd>Anne van Kesteren. <a href="https://url.spec.whatwg.org/"><cite>URL Standard</cite></a>. Living Standard. URL: <a href="https://url.spec.whatwg.org/">https://url.spec.whatwg.org/</a>
+   <dt id="biblio-webextensions">[WEBEXTENSIONS]
+   <dd>Mukul Purohit; et al. <a href="https://w3c.github.io/webextensions/specification/"><cite>Web Extensions</cite></a>. CG-DRAFT. URL: <a href="https://w3c.github.io/webextensions/specification/">https://w3c.github.io/webextensions/specification/</a>
+   <dt id="biblio-webextensions-browser-global">[WEBEXTENSIONS-BROWSER-GLOBAL]
+   <dd>Patrick Kettner. <a href="https://w3c.github.io/webextensions/specification/window.browser.html"><cite>window.browser</cite></a>. CG-DRAFT. URL: <a href="https://w3c.github.io/webextensions/specification/window.browser.html">https://w3c.github.io/webextensions/specification/window.browser.html</a>
+   <dt id="biblio-webhid">[WEBHID]
+   <dd>Matt Reynolds. <a href="https://hid.spec.whatwg.org/"><cite>WebHID Standard</cite></a>. Living Standard. URL: <a href="https://hid.spec.whatwg.org/">https://hid.spec.whatwg.org/</a>
+   <dt id="biblio-webidl">[WEBIDL]
+   <dd>Edgar Chen; Timothy Gu. <a href="https://webidl.spec.whatwg.org/"><cite>Web IDL Standard</cite></a>. Living Standard. URL: <a href="https://webidl.spec.whatwg.org/">https://webidl.spec.whatwg.org/</a>
+   <dt id="biblio-webusb">[WEBUSB]
+   <dd>Reilly Grant. <a href="https://usb.spec.whatwg.org/"><cite>WebUSB Standard</cite></a>. Living Standard. URL: <a href="https://usb.spec.whatwg.org/">https://usb.spec.whatwg.org/</a>
+  </dl>
+  <h3 class="heading no-num no-ref settled" id="informative"><span class="content">Non-Normative References</span></h3>
+  <dl>
+   <dt id="biblio-cssom">[CSSOM]
+   <dd>Daniel Glazman; Emilio Cobos Álvarez. <a href="https://drafts.csswg.org/cssom/"><cite>CSS Object Model (CSSOM)</cite></a>. URL: <a href="https://drafts.csswg.org/cssom/">https://drafts.csswg.org/cssom/</a>
+   <dt id="biblio-permissions-policy">[PERMISSIONS-POLICY]
+   <dd>Ian Clelland; Ari Chivukula. <a href="https://w3c.github.io/webappsec-permissions-policy/"><cite>Permissions Policy</cite></a>. URL: <a href="https://w3c.github.io/webappsec-permissions-policy/">https://w3c.github.io/webappsec-permissions-policy/</a>
+   <dt id="biblio-secure-contexts">[SECURE-CONTEXTS]
+   <dd>Mike West. <a href="https://w3c.github.io/webappsec-secure-contexts/"><cite>Secure Contexts</cite></a>. URL: <a href="https://w3c.github.io/webappsec-secure-contexts/">https://w3c.github.io/webappsec-secure-contexts/</a>
+  </dl>
+  <h2 class="heading no-num no-ref settled" id="issues-index"><span class="content">Issues Index</span></h2>
+  <div style="counter-reset:issue">
+   <div class="issue">
+    <p>The manifest is the only expected way to register an
+<a data-link-type="dfn" href="#extension-service-worker">extension service worker</a>. A document on the <a data-link-type="dfn" href="https://w3c.github.io/webextensions/specification/#dfn-extension-origin">extension origin</a> can
+nevertheless call <code class="idl"><a data-link-type="idl" href="https://w3c.github.io/ServiceWorker/#dom-serviceworkercontainer-register">register()</a></code> with the
+<a data-link-type="dfn" href="https://w3c.github.io/webextensions/specification/#extension-root-url">extension root URL</a> as the scope. Within an origin, <a data-link-type="biblio" href="#biblio-service-workers" title="Service Workers Nightly">[SERVICE-WORKERS]</a>
+identifies a <a data-link-type="dfn" href="https://w3c.github.io/ServiceWorker/#dfn-service-worker-registration">service worker registration</a> by its
+<a data-link-type="dfn" href="https://w3c.github.io/ServiceWorker/#dfn-scope-url">scope url</a>, so such a call names the
+<a data-link-type="dfn" href="https://w3c.github.io/webextensions/specification/#background-service-worker-registration">background service worker registration</a> and would replace its
+<a data-link-type="dfn" href="https://w3c.github.io/ServiceWorker/#dfn-service-worker">service worker</a> with the script passed to the call.</p>
+    <p>This group needs to decide two things: whether such a registration is
+permitted at all, and, if it is, whether the resulting <a data-link-type="dfn" href="https://w3c.github.io/ServiceWorker/#dfn-service-worker">service worker</a> is
+the <a data-link-type="dfn" href="#extension-service-worker">extension service worker</a> under the definition above.</p>
+    
+ <a class="issue-return" href="#issue-17433001" title="Jump to section">↵</a>
+   </div>
+   <div class="issue"> WebIDL does not currently allow a condition on an individual entry of
+an <a data-link-type="dfn" href="https://webidl.spec.whatwg.org/#dfn-exposure-set">exposure set</a>. Its exposure conditions ([<code class="idl"><a data-link-type="idl" href="https://webidl.spec.whatwg.org/#SecureContext">SecureContext</a></code>] and
+[<code class="idl"><a data-link-type="idl" href="https://webidl.spec.whatwg.org/#CrossOriginIsolated">CrossOriginIsolated</a></code>]) apply to a whole construct. A proposal to WebIDL
+is being prepared. Until WebIDL accepts a mechanism, no specification can
+reference the <a data-link-type="dfn" href="#extension-service-worker-realm">extension service worker realm</a> from IDL, and
+<a href="#current-exposures">Current exposures</a> describes intended exposure. <a class="issue-return" href="#issue-8bc9d7ba" title="Jump to section">↵</a></div>
+   <div class="issue"> <a data-link-type="biblio" href="#biblio-webextensions-browser-global" title="window.browser">[webextensions-browser-global]</a> declares
+<code>partial interface ServiceWorkerGlobalScope { attribute Browser browser; }</code>,
+which, read literally, exposes <code class="idl"><a data-link-type="idl" href="https://w3c.github.io/webextensions/specification/window.browser.html#browser-interface">Browser</a></code> in every <a data-link-type="dfn" href="https://w3c.github.io/ServiceWorker/#dfn-service-worker">service worker</a>. The
+<code>ServiceWorker</code> entry of that partial’s <a data-link-type="dfn" href="https://webidl.spec.whatwg.org/#dfn-exposure-set">exposure set</a> should be limited to
+the <a data-link-type="dfn" href="#extension-service-worker-realm">extension service worker realm</a> once WebIDL supports it. <a class="issue-return" href="#issue-4802b145" title="Jump to section">↵</a></div>
+  </div>
+<script>/* Boilerplate: script-dom-helper */
+"use strict";
+function query(sel) { return document.querySelector(sel); }
+
+function queryAll(sel) { return [...document.querySelectorAll(sel)]; }
+
+function iter(obj) {
+	if(!obj) return [];
+	var it = obj[Symbol.iterator];
+	if(it) return it;
+	return Object.entries(obj);
+}
+
+function mk(tagname, attrs, ...children) {
+	const el = document.createElement(tagname);
+	for(const [k,v] of iter(attrs)) {
+		if(k.slice(0,3) == "_on") {
+			const eventName = k.slice(3);
+			el.addEventListener(eventName, v);
+		} else if(k[0] == "_") {
+			// property, not attribute
+			el[k.slice(1)] = v;
+		} else {
+			if(v === false || v == null) {
+        continue;
+      } else if(v === true) {
+        el.setAttribute(k, "");
+        continue;
+      } else {
+  			el.setAttribute(k, v);
+      }
+		}
+	}
+	append(el, children);
+	return el;
+}
+
+/* Create shortcuts for every known HTML element */
+[
+  "a",
+  "abbr",
+  "acronym",
+  "address",
+  "applet",
+  "area",
+  "article",
+  "aside",
+  "audio",
+  "b",
+  "base",
+  "basefont",
+  "bdo",
+  "big",
+  "blockquote",
+  "body",
+  "br",
+  "button",
+  "canvas",
+  "caption",
+  "center",
+  "cite",
+  "code",
+  "col",
+  "colgroup",
+  "datalist",
+  "dd",
+  "del",
+  "details",
+  "dfn",
+  "dialog",
+  "div",
+  "dl",
+  "dt",
+  "em",
+  "embed",
+  "fieldset",
+  "figcaption",
+  "figure",
+  "font",
+  "footer",
+  "form",
+  "frame",
+  "frameset",
+  "head",
+  "header",
+  "h1",
+  "h2",
+  "h3",
+  "h4",
+  "h5",
+  "h6",
+  "hr",
+  "html",
+  "i",
+  "iframe",
+  "img",
+  "input",
+  "ins",
+  "kbd",
+  "label",
+  "legend",
+  "li",
+  "link",
+  "main",
+  "map",
+  "mark",
+  "meta",
+  "meter",
+  "nav",
+  "nobr",
+  "noscript",
+  "object",
+  "ol",
+  "optgroup",
+  "option",
+  "output",
+  "p",
+  "param",
+  "pre",
+  "progress",
+  "q",
+  "s",
+  "samp",
+  "script",
+  "section",
+  "select",
+  "small",
+  "source",
+  "span",
+  "strike",
+  "strong",
+  "style",
+  "sub",
+  "summary",
+  "sup",
+  "table",
+  "tbody",
+  "td",
+  "template",
+  "textarea",
+  "tfoot",
+  "th",
+  "thead",
+  "time",
+  "title",
+  "tr",
+  "u",
+  "ul",
+  "var",
+  "video",
+  "wbr",
+  "xmp",
+].forEach(tagname=>{
+	mk[tagname] = (...args) => mk(tagname, ...args);
+});
+
+function* nodesFromChildList(children) {
+	for(const child of children.flat(Infinity)) {
+		if(child instanceof Node) {
+			yield child;
+		} else {
+			yield new Text(child);
+		}
+	}
+}
+function append(el, ...children) {
+	for(const child of nodesFromChildList(children)) {
+		if(el instanceof Node) el.appendChild(child);
+		else el.push(child);
+	}
+	return el;
+}
+
+function insertAfter(el, ...children) {
+	for(const child of nodesFromChildList(children)) {
+		el.parentNode.insertBefore(child, el.nextSibling);
+	}
+	return el;
+}
+
+function clearContents(el) {
+	el.innerHTML = "";
+	return el;
+}
+
+function parseHTML(markup) {
+	if(markup.toLowerCase().trim().indexOf('<!doctype') === 0) {
+		const doc = document.implementation.createHTMLDocument("");
+		doc.documentElement.innerHTML = markup;
+		return doc;
+	} else {
+		const el = mk.template({});
+		el.innerHTML = markup;
+		return el.content;
+	}
+}</script>
+<script>/* Boilerplate: script-dfn-panel */
+"use strict";
+{
+let dfnPanelData = {
+"02406c7f": {"dfnID":"02406c7f","dfnText":"service worker registration","external":true,"refSections":[{"refs":[{"id":"ref-for-dfn-service-worker-registration"},{"id":"ref-for-dfn-service-worker-registration\u2460"}],"title":"Extension service workers"}],"url":"https://w3c.github.io/ServiceWorker/#dfn-service-worker-registration"},
+"0d0390b4": {"dfnID":"0d0390b4","dfnText":"browsing context","external":true,"refSections":[{"refs":[{"id":"ref-for-browsing-context"}],"title":"What the owning specification defines"}],"url":"https://html.spec.whatwg.org/multipage/document-sequences.html#browsing-context"},
+"168f1b6e": {"dfnID":"168f1b6e","dfnText":"global object","external":true,"refSections":[{"refs":[{"id":"ref-for-concept-realm-global"},{"id":"ref-for-concept-realm-global\u2460"}],"title":"The extension service worker realm"}],"url":"https://html.spec.whatwg.org/multipage/webappapis.html#concept-realm-global"},
+"221006de": {"dfnID":"221006de","dfnText":"extension scheme","external":true,"refSections":[{"refs":[{"id":"ref-for-extension-scheme"}],"title":"Extension service workers"}],"url":"https://w3c.github.io/webextensions/specification/#extension-scheme"},
+"25c36209": {"dfnID":"25c36209","dfnText":"exposed","external":true,"refSections":[{"refs":[{"id":"ref-for-dfn-exposed"}],"title":"The extension service worker realm"},{"refs":[{"id":"ref-for-dfn-exposed\u2460"}],"title":"Criteria"}],"url":"https://webidl.spec.whatwg.org/#dfn-exposed"},
+"2bebe2c9": {"dfnID":"2bebe2c9","dfnText":"background service worker registration","external":true,"refSections":[{"refs":[{"id":"ref-for-background-service-worker-registration"},{"id":"ref-for-background-service-worker-registration\u2460"},{"id":"ref-for-background-service-worker-registration\u2461"}],"title":"Extension service workers"},{"refs":[{"id":"ref-for-background-service-worker-registration\u2462"}],"title":"The extension service worker realm"}],"url":"https://w3c.github.io/webextensions/specification/#background-service-worker-registration"},
+"370c31a2": {"dfnID":"370c31a2","dfnText":"privileged extension context","external":true,"refSections":[{"refs":[{"id":"ref-for-privileged-extension-context"}],"title":"Extension service workers"}],"url":"https://w3c.github.io/webextensions/specification/#privileged-extension-context"},
+"3e84248c": {"dfnID":"3e84248c","dfnText":"HID","external":true,"refSections":[{"refs":[{"id":"ref-for-dom-hid"}],"title":"Current exposures"}],"url":"https://hid.spec.whatwg.org/#dom-hid"},
+"3f9ec3a3": {"dfnID":"3f9ec3a3","dfnText":"script url","external":true,"refSections":[{"refs":[{"id":"ref-for-dfn-script-url"}],"title":"Extension service workers"}],"url":"https://w3c.github.io/ServiceWorker/#dfn-script-url"},
+"47fe679e": {"dfnID":"47fe679e","dfnText":"transient activation","external":true,"refSections":[{"refs":[{"id":"ref-for-transient-activation"},{"id":"ref-for-transient-activation\u2460"}],"title":"Criteria"},{"refs":[{"id":"ref-for-transient-activation\u2461"},{"id":"ref-for-transient-activation\u2462"}],"title":"What the owning specification defines"},{"refs":[{"id":"ref-for-transient-activation\u2463"},{"id":"ref-for-transient-activation\u2464"}],"title":"Current exposures"},{"refs":[{"id":"ref-for-transient-activation\u2465"}],"title":"Security considerations"}],"url":"https://html.spec.whatwg.org/multipage/interaction.html#transient-activation"},
+"5102209a": {"dfnID":"5102209a","dfnText":"active worker","external":true,"refSections":[{"refs":[{"id":"ref-for-dfn-active-worker"}],"title":"Extension service workers"}],"url":"https://w3c.github.io/ServiceWorker/#dfn-active-worker"},
+"5736088e": {"dfnID":"5736088e","dfnText":"register(scriptURL)","external":true,"refSections":[{"refs":[{"id":"ref-for-dom-serviceworkercontainer-register"}],"title":"Extension service workers"}],"url":"https://w3c.github.io/ServiceWorker/#dom-serviceworkercontainer-register"},
+"5b522ac1": {"dfnID":"5b522ac1","dfnText":"extension origin","external":true,"refSections":[{"refs":[{"id":"ref-for-dfn-extension-origin"},{"id":"ref-for-dfn-extension-origin\u2460"}],"title":"Extension service workers"}],"url":"https://w3c.github.io/webextensions/specification/#dfn-extension-origin"},
+"5d7209e9": {"dfnID":"5d7209e9","dfnText":"Window","external":true,"refSections":[{"refs":[{"id":"ref-for-window"}],"title":"Criteria"}],"url":"https://html.spec.whatwg.org/multipage/nav-history-apis.html#window"},
+"612fa802": {"dfnID":"612fa802","dfnText":"USB","external":true,"refSections":[{"refs":[{"id":"ref-for-usb"}],"title":"Current exposures"}],"url":"https://usb.spec.whatwg.org/#usb"},
+"631ad9e6": {"dfnID":"631ad9e6","dfnText":"exposure set","external":true,"refSections":[{"refs":[{"id":"ref-for-dfn-exposure-set"},{"id":"ref-for-dfn-exposure-set\u2460"},{"id":"ref-for-dfn-exposure-set\u2461"}],"title":"The extension service worker realm"},{"refs":[{"id":"ref-for-dfn-exposure-set\u2462"},{"id":"ref-for-dfn-exposure-set\u2463"},{"id":"ref-for-dfn-exposure-set\u2464"},{"id":"ref-for-dfn-exposure-set\u2465"}],"title":"Criteria"},{"refs":[{"id":"ref-for-dfn-exposure-set\u2466"}],"title":"Current exposures"}],"url":"https://webidl.spec.whatwg.org/#dfn-exposure-set"},
+"65181da8": {"dfnID":"65181da8","dfnText":"secure context","external":true,"refSections":[{"refs":[{"id":"ref-for-secure-context"}],"title":"Extension service workers"}],"url":"https://html.spec.whatwg.org/multipage/webappapis.html#secure-context"},
+"70736ed4": {"dfnID":"70736ed4","dfnText":"Fire Functional Event","external":true,"refSections":[{"refs":[{"id":"ref-for-fire-functional-event"}],"title":"Criteria"}],"url":"https://w3c.github.io/ServiceWorker/#fire-functional-event"},
+"76b107de": {"dfnID":"76b107de","dfnText":"ExtendableEvent","external":true,"refSections":[{"refs":[{"id":"ref-for-extendableevent"}],"title":"What the owning specification defines"}],"url":"https://w3c.github.io/ServiceWorker/#extendableevent"},
+"7d294a6c": {"dfnID":"7d294a6c","dfnText":"Browser","external":true,"refSections":[{"refs":[{"id":"ref-for-browser-interface"}],"title":"Current exposures"}],"url":"https://w3c.github.io/webextensions/specification/window.browser.html#browser-interface"},
+"85394472": {"dfnID":"85394472","dfnText":"Document","external":true,"refSections":[{"refs":[{"id":"ref-for-document"}],"title":"What the owning specification defines"}],"url":"https://dom.spec.whatwg.org/#document"},
+"86d2a717": {"dfnID":"86d2a717","dfnText":"ServiceWorkerGlobalScope","external":true,"refSections":[{"refs":[{"id":"ref-for-serviceworkerglobalscope"}],"title":"Criteria"}],"url":"https://w3c.github.io/ServiceWorker/#serviceworkerglobalscope"},
+"86edd5d5": {"dfnID":"86edd5d5","dfnText":"extension root URL","external":true,"refSections":[{"refs":[{"id":"ref-for-extension-root-url"}],"title":"Extension service workers"}],"url":"https://w3c.github.io/webextensions/specification/#extension-root-url"},
+"889e932f": {"dfnID":"889e932f","dfnText":"Exposed","external":true,"refSections":[{"refs":[{"id":"ref-for-Exposed"}],"title":"The extension service worker realm"}],"url":"https://webidl.spec.whatwg.org/#Exposed"},
+"90f19891": {"dfnID":"90f19891","dfnText":"register the background service worker","external":true,"refSections":[{"refs":[{"id":"ref-for-register-the-background-service-worker"}],"title":"Extension service workers"}],"url":"https://w3c.github.io/webextensions/specification/#register-the-background-service-worker"},
+"959ad97b": {"dfnID":"959ad97b","dfnText":"origin","external":true,"refSections":[{"refs":[{"id":"ref-for-concept-url-origin"}],"title":"Extension service workers"}],"url":"https://url.spec.whatwg.org/#concept-url-origin"},
+"9db5bc57": {"dfnID":"9db5bc57","dfnText":"Clipboard","external":true,"refSections":[{"refs":[{"id":"ref-for-clipboard"},{"id":"ref-for-clipboard\u2460"}],"title":"Current exposures"}],"url":"https://w3c.github.io/clipboard-apis/#clipboard"},
+"a4785085": {"dfnID":"a4785085","dfnText":"WorkerNavigator","external":true,"refSections":[{"refs":[{"id":"ref-for-workernavigator"}],"title":"What the owning specification defines"}],"url":"https://html.spec.whatwg.org/multipage/workers.html#workernavigator"},
+"a5f015e3": {"dfnID":"a5f015e3","dfnText":"realm","external":true,"refSections":[{"refs":[{"id":"ref-for-realm"},{"id":"ref-for-realm\u2460"}],"title":"The extension service worker realm"}],"url":"https://tc39.es/ecma262/multipage/executable-code-and-execution-contexts.html#realm"},
+"b5034374": {"dfnID":"b5034374","dfnText":"extension permission check","external":true,"refSections":[{"refs":[{"id":"ref-for-extension-permission-check"}],"title":"Criteria"},{"refs":[{"id":"ref-for-extension-permission-check\u2460"}],"title":"What the owning specification defines"},{"refs":[{"id":"ref-for-extension-permission-check\u2461"}],"title":"Current exposures"},{"refs":[{"id":"ref-for-extension-permission-check\u2462"},{"id":"ref-for-extension-permission-check\u2463"}],"title":"Security considerations"}],"url":"https://w3c.github.io/webextensions/specification/#extension-permission-check"},
+"b75bb3bd": {"dfnID":"b75bb3bd","dfnText":"SecureContext","external":true,"refSections":[{"refs":[{"id":"ref-for-SecureContext"}],"title":"The extension service worker realm"}],"url":"https://webidl.spec.whatwg.org/#SecureContext"},
+"c60ed63a": {"dfnID":"c60ed63a","dfnText":"service worker","external":true,"refSections":[{"refs":[{"id":"ref-for-dfn-service-worker"},{"id":"ref-for-dfn-service-worker\u2460"},{"id":"ref-for-dfn-service-worker\u2461"},{"id":"ref-for-dfn-service-worker\u2462"},{"id":"ref-for-dfn-service-worker\u2463"},{"id":"ref-for-dfn-service-worker\u2464"},{"id":"ref-for-dfn-service-worker\u2465"},{"id":"ref-for-dfn-service-worker\u2466"},{"id":"ref-for-dfn-service-worker\u2467"}],"title":"Introduction"},{"refs":[{"id":"ref-for-dfn-service-worker\u2468"},{"id":"ref-for-dfn-service-worker\u2460\u24ea"},{"id":"ref-for-dfn-service-worker\u2460\u2460"},{"id":"ref-for-dfn-service-worker\u2460\u2461"},{"id":"ref-for-dfn-service-worker\u2460\u2462"},{"id":"ref-for-dfn-service-worker\u2460\u2463"}],"title":"Extension service workers"},{"refs":[{"id":"ref-for-dfn-service-worker\u2460\u2464"},{"id":"ref-for-dfn-service-worker\u2460\u2465"},{"id":"ref-for-dfn-service-worker\u2460\u2466"}],"title":"The extension service worker realm"},{"refs":[{"id":"ref-for-dfn-service-worker\u2460\u2467"},{"id":"ref-for-dfn-service-worker\u2460\u2468"},{"id":"ref-for-dfn-service-worker\u2461\u24ea"},{"id":"ref-for-dfn-service-worker\u2461\u2460"}],"title":"Criteria"},{"refs":[{"id":"ref-for-dfn-service-worker\u2461\u2461"},{"id":"ref-for-dfn-service-worker\u2461\u2462"},{"id":"ref-for-dfn-service-worker\u2461\u2463"}],"title":"Current exposures"},{"refs":[{"id":"ref-for-dfn-service-worker\u2461\u2464"}],"title":"Security considerations"}],"url":"https://w3c.github.io/ServiceWorker/#dfn-service-worker"},
+"cc2141c1": {"dfnID":"cc2141c1","dfnText":"CrossOriginIsolated","external":true,"refSections":[{"refs":[{"id":"ref-for-CrossOriginIsolated"}],"title":"The extension service worker realm"}],"url":"https://webidl.spec.whatwg.org/#CrossOriginIsolated"},
+"d0f8d259": {"dfnID":"d0f8d259","dfnText":"functional events","external":true,"refSections":[{"refs":[{"id":"ref-for-dfn-functional-events"}],"title":"Criteria"},{"refs":[{"id":"ref-for-dfn-functional-events\u2460"}],"title":"What the owning specification defines"},{"refs":[{"id":"ref-for-dfn-functional-events\u2461"},{"id":"ref-for-dfn-functional-events\u2462"}],"title":"Current exposures"}],"url":"https://w3c.github.io/ServiceWorker/#dfn-functional-events"},
+"e3c5ca09": {"dfnID":"e3c5ca09","dfnText":"global names","external":true,"refSections":[{"refs":[{"id":"ref-for-dfn-global-name"}],"title":"The extension service worker realm"},{"refs":[{"id":"ref-for-dfn-global-name\u2460"}],"title":"What the owning specification defines"}],"url":"https://webidl.spec.whatwg.org/#dfn-global-name"},
+"e99bd18e": {"dfnID":"e99bd18e","dfnText":"relevant global object","external":true,"refSections":[{"refs":[{"id":"ref-for-concept-relevant-global"},{"id":"ref-for-concept-relevant-global\u2460"}],"title":"What the owning specification defines"}],"url":"https://html.spec.whatwg.org/multipage/webappapis.html#concept-relevant-global"},
+"exposure-to-all-service-workers": {"dfnID":"exposure-to-all-service-workers","dfnText":"Expose it to all\nservice workers","external":false,"refSections":[{"refs":[{"id":"ref-for-exposure-to-all-service-workers"},{"id":"ref-for-exposure-to-all-service-workers\u2460"}],"title":"Criteria"}],"url":"#exposure-to-all-service-workers"},
+"exposure-to-extension-service-workers-only": {"dfnID":"exposure-to-extension-service-workers-only","dfnText":"expose it to\nextension service workers only","external":false,"refSections":[{"refs":[{"id":"ref-for-exposure-to-extension-service-workers-only"},{"id":"ref-for-exposure-to-extension-service-workers-only\u2460"}],"title":"Criteria"}],"url":"#exposure-to-extension-service-workers-only"},
+"extension-service-worker": {"dfnID":"extension-service-worker","dfnText":"extension\nservice worker","external":false,"refSections":[{"refs":[{"id":"ref-for-extension-service-worker\u2460"},{"id":"ref-for-extension-service-worker\u2461"},{"id":"ref-for-extension-service-worker\u2462"},{"id":"ref-for-extension-service-worker\u2463"},{"id":"ref-for-extension-service-worker\u2464"},{"id":"ref-for-extension-service-worker\u2465"},{"id":"ref-for-extension-service-worker\u2466"},{"id":"ref-for-extension-service-worker\u2467"},{"id":"ref-for-extension-service-worker\u2468"},{"id":"ref-for-extension-service-worker\u2460\u24ea"}],"title":"Introduction"},{"refs":[{"id":"ref-for-extension-service-worker\u2460\u2460"},{"id":"ref-for-extension-service-worker\u2460\u2461"},{"id":"ref-for-extension-service-worker\u2460\u2462"},{"id":"ref-for-extension-service-worker\u2460\u2463"}],"title":"Extension service workers"},{"refs":[{"id":"ref-for-extension-service-worker\u2460\u2464"},{"id":"ref-for-extension-service-worker\u2460\u2465"},{"id":"ref-for-extension-service-worker\u2460\u2466"},{"id":"ref-for-extension-service-worker\u2460\u2467"},{"id":"ref-for-extension-service-worker\u2460\u2468"}],"title":"Criteria"},{"refs":[{"id":"ref-for-extension-service-worker\u2461\u24ea"},{"id":"ref-for-extension-service-worker\u2461\u2460"}],"title":"What the owning specification defines"},{"refs":[{"id":"ref-for-extension-service-worker\u2461\u2461"},{"id":"ref-for-extension-service-worker\u2461\u2462"},{"id":"ref-for-extension-service-worker\u2461\u2463"},{"id":"ref-for-extension-service-worker\u2461\u2464"},{"id":"ref-for-extension-service-worker\u2461\u2465"},{"id":"ref-for-extension-service-worker\u2461\u2466"}],"title":"Current exposures"},{"refs":[{"id":"ref-for-extension-service-worker\u2461\u2467"},{"id":"ref-for-extension-service-worker\u2461\u2468"},{"id":"ref-for-extension-service-worker\u2462\u24ea"},{"id":"ref-for-extension-service-worker\u2462\u2460"},{"id":"ref-for-extension-service-worker\u2462\u2461"}],"title":"Security considerations"},{"refs":[{"id":"ref-for-extension-service-worker\u2462\u2462"}],"title":"Privacy considerations"}],"url":"#extension-service-worker"},
+"extension-service-worker-realm": {"dfnID":"extension-service-worker-realm","dfnText":"extension service worker realm","external":false,"refSections":[{"refs":[{"id":"ref-for-extension-service-worker-realm"}],"title":"Introduction"},{"refs":[{"id":"ref-for-extension-service-worker-realm\u2460"}],"title":"Extension service workers"},{"refs":[{"id":"ref-for-extension-service-worker-realm\u2461"},{"id":"ref-for-extension-service-worker-realm\u2462"},{"id":"ref-for-extension-service-worker-realm\u2463"},{"id":"ref-for-extension-service-worker-realm\u2464"}],"title":"The extension service worker realm"},{"refs":[{"id":"ref-for-extension-service-worker-realm\u2465"}],"title":"Criteria"},{"refs":[{"id":"ref-for-extension-service-worker-realm\u2466"}],"title":"What the owning specification defines"},{"refs":[{"id":"ref-for-extension-service-worker-realm\u2467"},{"id":"ref-for-extension-service-worker-realm\u2468"},{"id":"ref-for-extension-service-worker-realm\u2460\u24ea"},{"id":"ref-for-extension-service-worker-realm\u2460\u2460"}],"title":"Current exposures"},{"refs":[{"id":"ref-for-extension-service-worker-realm\u2460\u2461"}],"title":"Privacy considerations"}],"url":"#extension-service-worker-realm"},
+"fc627dec": {"dfnID":"fc627dec","dfnText":"scope url","external":true,"refSections":[{"refs":[{"id":"ref-for-dfn-scope-url"},{"id":"ref-for-dfn-scope-url\u2460"}],"title":"Extension service workers"}],"url":"https://w3c.github.io/ServiceWorker/#dfn-scope-url"},
+"ff69e85f": {"dfnID":"ff69e85f","dfnText":"ClipboardItem","external":true,"refSections":[{"refs":[{"id":"ref-for-clipboarditem"},{"id":"ref-for-clipboarditem\u2460"}],"title":"Current exposures"}],"url":"https://w3c.github.io/clipboard-apis/#clipboarditem"},
+};
+
+document.addEventListener("DOMContentLoaded", ()=>{
+    genAllDfnPanels();
+
+    document.body.addEventListener("click", (e) => {
+        // If not handled already, just hide all dfn panels.
+        hideAllDfnPanels();
+    });
+});
+
+window.addEventListener("resize", () => {
+    // Pin any visible dfn panel
+    queryAll(".dfn-panel.on, .dfn-panel.activated").forEach(el=>positionDfnPanel(el));
+});
+
+function genAllDfnPanels() {
+    for(const panelData of Object.values(dfnPanelData)) {
+        const dfnID = panelData.dfnID;
+        const dfn = document.getElementById(dfnID);
+        if(!dfn) {
+            console.log(`Can't find dfn#${dfnID}.`, panelData);
+            continue;
+        }
+        dfn.panelData = panelData;
+        insertDfnPopupAction(dfn);
+    }
+}
+
+function genDfnPanel(dfn, { dfnID, url, dfnText, refSections, external }) {
+    const dfnPanel = mk.aside({
+        class: "dfn-panel on",
+        id: `infopanel-for-${dfnID}`,
+        "data-for": dfnID,
+        "aria-labelled-by":`infopaneltitle-for-${dfnID}`,
+        },
+        mk.span({id:`infopaneltitle-for-${dfnID}`, style:"display:none"},
+            `Info about the '${dfnText}' ${external?"external":""} reference.`),
+        mk.a({href:url, class:"dfn-link"}, url),
+        refSections.length == 0 ? [] :
+            mk.b({}, "Referenced in:"),
+            mk.ul({},
+                ...refSections.map(section=>
+                    mk.li({},
+                        ...section.refs.map((ref, refI)=>
+                            [
+                                mk.a({ href: `#${ref.id}` },
+                                    (refI == 0) ? section.title : `(${refI + 1})`
+                                ),
+                                " ",
+                            ]
+                        ),
+                    ),
+                ),
+            ),
+        genLinkingSyntaxes(dfn),
+    );
+
+    dfnPanel.addEventListener('click', (event) => {
+        if (event.target.nodeName == 'A') {
+            scrollToTargetAndHighlight(event);
+            pinDfnPanel(dfnPanel);
+        }
+        event.stopPropagation();
+        refocusOnTarget(event);
+    });
+    dfnPanel.addEventListener('keydown', (event) => {
+        if(event.keyCode == 27) { // Escape key
+            hideDfnPanel({dfnPanel});
+            event.stopPropagation();
+            event.preventDefault();
+        }
+    });
+
+    dfnPanel.dfn = dfn;
+    dfn.dfnPanel = dfnPanel;
+    return dfnPanel;
+}
+
+
+
+function hideAllDfnPanels() {
+    // Delete the currently-active dfn panel.
+    queryAll(".dfn-panel").forEach(dfnPanel=>hideDfnPanel({dfnPanel}));
+}
+
+function showDfnPanel(dfn) {
+    hideAllDfnPanels(); // Only display one at a time.
+
+    dfn.setAttribute("aria-expanded", "true");
+
+    const dfnPanel = genDfnPanel(dfn, dfn.panelData);
+
+    // Give the dfn a unique tabindex, and then
+    // give all the tabbable panel bits successive indexes.
+    let tabIndex = 100;
+    dfn.tabIndex = tabIndex++;
+    const tabbable = dfnPanel.querySelectorAll(":is(a, button)");
+    for (const el of tabbable) {
+        el.tabIndex = tabIndex++;
+    }
+
+    append(document.body, dfnPanel);
+    positionDfnPanel(dfnPanel);
+}
+
+function positionDfnPanel(dfnPanel) {
+    const dfn = dfnPanel.dfn;
+    const dfnPos = getBounds(dfn);
+    dfnPanel.style.top = dfnPos.bottom + "px";
+    dfnPanel.style.left = dfnPos.left + "px";
+
+    const panelPos = dfnPanel.getBoundingClientRect();
+    const panelMargin = 8;
+    const maxRight = document.body.parentNode.clientWidth - panelMargin;
+    if (panelPos.right > maxRight) {
+        const overflowAmount = panelPos.right - maxRight;
+        const newLeft = Math.max(panelMargin, dfnPos.left - overflowAmount);
+        dfnPanel.style.left = newLeft + "px";
+    }
+}
+
+function pinDfnPanel(dfnPanel) {
+    // Switch it to "activated" state, which pins it.
+    dfnPanel.classList.add("activated");
+    dfnPanel.style.position = "fixed";
+    dfnPanel.style.left = null;
+    dfnPanel.style.top = null;
+}
+
+function hideDfnPanel({dfn, dfnPanel}) {
+    if(!dfnPanel) dfnPanel = dfn.dfnPanel;
+    if(!dfn) dfn = dfnPanel.dfn;
+    dfn.dfnPanel = undefined;
+    dfnPanel.dfn = undefined;
+    dfn.setAttribute("aria-expanded", "false");
+    dfn.tabIndex = undefined;
+    dfnPanel.remove()
+}
+
+function toggleDfnPanel(dfn) {
+    if(dfn.dfnPanel) {
+        hideDfnPanel(dfn);
+    } else {
+        showDfnPanel(dfn);
+    }
+}
+
+function insertDfnPopupAction(dfn) {
+    dfn.setAttribute('role', 'button');
+    dfn.setAttribute('aria-expanded', 'false')
+    dfn.tabIndex = 0;
+    dfn.classList.add('has-dfn-panel');
+    dfn.addEventListener('click', (event) => {
+        toggleDfnPanel(dfn);
+        event.stopPropagation();
+    });
+    dfn.addEventListener('keypress', (event) => {
+        const kc = event.keyCode;
+        // 32->Space, 13->Enter
+        if(kc == 32 || kc == 13) {
+            toggleDfnPanel(dfn);
+            event.stopPropagation();
+            event.preventDefault();
+        }
+    });
+}
+
+function refocusOnTarget(event) {
+    const target = event.target;
+    setTimeout(() => {
+        // Refocus on the event.target element.
+        // This is needed after browser scrolls to the destination.
+        target.focus();
+    });
+}
+
+// TODO: shared util
+// Returns the root-level absolute position {left and top} of element.
+function getBounds(el, relativeTo=document.body) {
+    const relativeRect = relativeTo.getBoundingClientRect();
+    const elRect = el.getBoundingClientRect();
+    const top = elRect.top - relativeRect.top;
+    const left = elRect.left - relativeRect.left;
+    return {
+        top,
+        left,
+        bottom: top + elRect.height,
+        right: left + elRect.width,
+    }
+}
+
+function scrollToTargetAndHighlight(event) {
+    let hash = event.target.hash;
+    if (hash) {
+        hash = decodeURIComponent(hash.substring(1));
+        const dest = document.getElementById(hash);
+        if (dest) {
+            dest.classList.add('highlighted');
+            setTimeout(() => dest.classList.remove('highlighted'), 1000);
+        }
+    }
+}
+
+// Functions, divided by link type, that wrap an autolink's
+// contents with the appropriate outer syntax.
+// Alternately, a string naming another type they format
+// the same as.
+function needsFor(type) {
+    switch(type) {
+        case "descriptor":
+        case "value":
+        case "element-attr":
+        case "attr-value":
+        case "element-state":
+        case "method":
+        case "constructor":
+        case "argument":
+        case "attribute":
+        case "const":
+        case "dict-member":
+        case "event":
+        case "enum-value":
+        case "stringifier":
+        case "serializer":
+        case "iterator":
+        case "maplike":
+        case "setlike":
+        case "state":
+        case "mode":
+        case "context":
+        case "facet": return true;
+
+        default: return false;
+    }
+}
+function refusesFor(type) {
+    switch(type) {
+        case "property":
+        case "element":
+        case "interface":
+        case "namespace":
+        case "callback":
+        case "dictionary":
+        case "enum":
+        case "exception":
+        case "typedef":
+        case "http-header":
+        case "permission": return true;
+
+        default: return false;
+    }
+}
+function linkFormatterFromType(type) {
+    switch(type) {
+        case 'scheme':
+        case 'permission':
+        case 'dfn': return (text) => `[=${text}=]`;
+
+        case 'abstract-op': return (text) => `[\$${text}\$]`;
+
+        case 'function':
+        case 'at-rule':
+        case 'selector':
+        case 'value': return (text) => `''${text}''`;
+
+        case 'http-header': return (text) => `[:${text}:]`;
+
+        case 'interface':
+        case 'constructor':
+        case 'method':
+        case 'argument':
+        case 'attribute':
+        case 'callback':
+        case 'dictionary':
+        case 'dict-member':
+        case 'enum':
+        case 'enum-value':
+        case 'exception':
+        case 'const':
+        case 'typedef':
+        case 'stringifier':
+        case 'serializer':
+        case 'iterator':
+        case 'maplike':
+        case 'setlike':
+        case 'extended-attribute':
+        case 'event':
+        case 'idl': return (text) => `{{${text}}}`;
+
+        case 'element-state':
+        case 'element-attr':
+        case 'attr-value':
+        case 'element': return (element) => `<{${element}}>`;
+
+        case 'grammar': return (text) => `${text} (within a <pre class=prod>)`;
+
+        case 'type': return (text)=> `<<${text}>>`;
+
+        case 'descriptor':
+        case 'property': return (text) => `'${text}'`;
+
+        default: return;
+    };
+};
+
+function genLinkingSyntaxes(dfn) {
+    if(dfn.tagName != "DFN") return;
+
+    const type = dfn.getAttribute('data-dfn-type');
+    if(!type) {
+        console.log(`<dfn> doesn't have a data-dfn-type:`, dfn);
+        return [];
+    }
+
+    // Return a function that wraps link text based on the type
+    const linkFormatter = linkFormatterFromType(type);
+    if(!linkFormatter) {
+        console.log(`<dfn> has an unknown data-dfn-type:`, dfn);
+        return [];
+    }
+
+    let ltAlts;
+    if(dfn.hasAttribute('data-lt')) {
+        ltAlts = dfn.getAttribute('data-lt')
+            .split("|")
+            .map(x=>x.trim());
+    } else {
+        ltAlts = [dfn.textContent.trim()];
+    }
+    if(type == "type") {
+        // lt of "<foo>", but "foo" is the interior;
+        // <<foo/bar>> is how you write it with a for,
+        // not <foo/<bar>> or whatever.
+        for(var i = 0; i < ltAlts.length; i++) {
+            const lt = ltAlts[i];
+            const match = /<(.*)>/.exec(lt);
+            if(match) { ltAlts[i] = match[1]; }
+        }
+    }
+
+    let forAlts;
+    if(dfn.hasAttribute('data-dfn-for')) {
+        forAlts = dfn.getAttribute('data-dfn-for')
+            .split(",")
+            .map(x=>x.trim());
+    } else {
+        forAlts = [''];
+    }
+
+    let linkingSyntaxes = [];
+    if(!needsFor(type)) {
+        for(const lt of ltAlts) {
+            linkingSyntaxes.push(linkFormatter(lt));
+        }
+    }
+    if(!refusesFor(type)) {
+        for(const f of forAlts) {
+            linkingSyntaxes.push(linkFormatter(`${f}/${ltAlts[0]}`))
+        }
+    }
+    return [
+        mk.b({}, 'Possible linking syntaxes:'),
+        mk.ul({},
+            ...linkingSyntaxes.map(link => {
+                const copyLink = async () =>
+                    await navigator.clipboard.writeText(link);
+                return mk.li({},
+                    mk.div({ class: 'link-item' },
+                        mk.button({
+                            class: 'copy-icon', title: 'Copy',
+                            type: 'button',
+                            _onclick: copyLink,
+                            tabindex: 0,
+                        }, mk.span({ class: 'icon' }) ),
+                        mk.span({}, link)
+                    )
+                );
+            })
+        )
+    ];
+}
+}
+</script>
+<script>/* Boilerplate: script-ref-hints */
+"use strict";
+{
+let refsData = {
+"#exposure-to-all-service-workers": {"displayText":"exposure to all service workers","export":true,"for_":[],"level":"1","normative":true,"shortname":"webextensions-service-workers","spec":"webextensions-service-workers-1","status":"local","text":"exposure to all service workers","type":"dfn","url":"#exposure-to-all-service-workers"},
+"#exposure-to-extension-service-workers-only": {"displayText":"exposure to extension service workers only","export":true,"for_":[],"level":"1","normative":true,"shortname":"webextensions-service-workers","spec":"webextensions-service-workers-1","status":"local","text":"exposure to extension service workers only","type":"dfn","url":"#exposure-to-extension-service-workers-only"},
+"#extension-service-worker": {"displayText":"extension service worker","export":true,"for_":[],"level":"1","normative":true,"shortname":"webextensions-service-workers","spec":"webextensions-service-workers-1","status":"local","text":"extension service worker","type":"dfn","url":"#extension-service-worker"},
+"#extension-service-worker-realm": {"displayText":"extension service worker realm","export":true,"for_":[],"level":"1","normative":true,"shortname":"webextensions-service-workers","spec":"webextensions-service-workers-1","status":"local","text":"extension service worker realm","type":"dfn","url":"#extension-service-worker-realm"},
+"https://dom.spec.whatwg.org/#document": {"displayText":"Document","export":true,"for_":[],"level":"1","normative":true,"shortname":"dom","spec":"dom","status":"current","text":"Document","type":"interface","url":"https://dom.spec.whatwg.org/#document"},
+"https://hid.spec.whatwg.org/#dom-hid": {"displayText":"HID","export":true,"for_":[],"level":"1","normative":true,"shortname":"hid","spec":"hid","status":"current","text":"HID","type":"interface","url":"https://hid.spec.whatwg.org/#dom-hid"},
+"https://html.spec.whatwg.org/multipage/document-sequences.html#browsing-context": {"displayText":"browsing context","export":true,"for_":[],"level":"1","normative":true,"shortname":"html","spec":"html","status":"current","text":"browsing context","type":"dfn","url":"https://html.spec.whatwg.org/multipage/document-sequences.html#browsing-context"},
+"https://html.spec.whatwg.org/multipage/interaction.html#transient-activation": {"displayText":"transient activation","export":true,"for_":[],"level":"1","normative":true,"shortname":"html","spec":"html","status":"current","text":"transient activation","type":"dfn","url":"https://html.spec.whatwg.org/multipage/interaction.html#transient-activation"},
+"https://html.spec.whatwg.org/multipage/nav-history-apis.html#window": {"displayText":"Window","export":true,"for_":[],"level":"1","normative":true,"shortname":"html","spec":"html","status":"current","text":"Window","type":"interface","url":"https://html.spec.whatwg.org/multipage/nav-history-apis.html#window"},
+"https://html.spec.whatwg.org/multipage/webappapis.html#concept-realm-global": {"displayText":"global object","export":true,"for_":["realm"],"level":"1","normative":true,"shortname":"html","spec":"html","status":"current","text":"global object","type":"dfn","url":"https://html.spec.whatwg.org/multipage/webappapis.html#concept-realm-global"},
+"https://html.spec.whatwg.org/multipage/webappapis.html#concept-relevant-global": {"displayText":"relevant global object","export":true,"for_":[],"level":"1","normative":true,"shortname":"html","spec":"html","status":"current","text":"relevant global object","type":"dfn","url":"https://html.spec.whatwg.org/multipage/webappapis.html#concept-relevant-global"},
+"https://html.spec.whatwg.org/multipage/webappapis.html#secure-context": {"displayText":"secure context","export":true,"for_":[],"level":"1","normative":true,"shortname":"html","spec":"html","status":"current","text":"secure context","type":"dfn","url":"https://html.spec.whatwg.org/multipage/webappapis.html#secure-context"},
+"https://html.spec.whatwg.org/multipage/workers.html#workernavigator": {"displayText":"WorkerNavigator","export":true,"for_":[],"level":"1","normative":true,"shortname":"html","spec":"html","status":"current","text":"WorkerNavigator","type":"interface","url":"https://html.spec.whatwg.org/multipage/workers.html#workernavigator"},
+"https://tc39.es/ecma262/multipage/executable-code-and-execution-contexts.html#realm": {"displayText":"realm","export":true,"for_":["ECMAScript"],"level":"1","normative":true,"shortname":"ecmascript","spec":"ecmascript","status":"current","text":"realm","type":"dfn","url":"https://tc39.es/ecma262/multipage/executable-code-and-execution-contexts.html#realm"},
+"https://url.spec.whatwg.org/#concept-url-origin": {"displayText":"origin","export":true,"for_":["url"],"level":"1","normative":true,"shortname":"url","spec":"url","status":"current","text":"origin","type":"dfn","url":"https://url.spec.whatwg.org/#concept-url-origin"},
+"https://usb.spec.whatwg.org/#usb": {"displayText":"USB","export":true,"for_":[],"level":"1","normative":true,"shortname":"usb","spec":"usb","status":"current","text":"USB","type":"interface","url":"https://usb.spec.whatwg.org/#usb"},
+"https://w3c.github.io/ServiceWorker/#dfn-active-worker": {"displayText":"active worker","export":true,"for_":["service worker registration"],"level":"1","normative":true,"shortname":"service-workers","spec":"service-workers","status":"current","text":"active worker","type":"dfn","url":"https://w3c.github.io/ServiceWorker/#dfn-active-worker"},
+"https://w3c.github.io/ServiceWorker/#dfn-functional-events": {"displayText":"functional events","export":true,"for_":["service worker"],"level":"1","normative":true,"shortname":"service-workers","spec":"service-workers","status":"current","text":"functional events","type":"dfn","url":"https://w3c.github.io/ServiceWorker/#dfn-functional-events"},
+"https://w3c.github.io/ServiceWorker/#dfn-scope-url": {"displayText":"scope url","export":true,"for_":["service worker registration"],"level":"1","normative":true,"shortname":"service-workers","spec":"service-workers","status":"current","text":"scope url","type":"dfn","url":"https://w3c.github.io/ServiceWorker/#dfn-scope-url"},
+"https://w3c.github.io/ServiceWorker/#dfn-script-url": {"displayText":"script url","export":true,"for_":["service worker"],"level":"1","normative":true,"shortname":"service-workers","spec":"service-workers","status":"current","text":"script url","type":"dfn","url":"https://w3c.github.io/ServiceWorker/#dfn-script-url"},
+"https://w3c.github.io/ServiceWorker/#dfn-service-worker": {"displayText":"service worker","export":true,"for_":[],"level":"1","normative":true,"shortname":"service-workers","spec":"service-workers","status":"current","text":"service worker","type":"dfn","url":"https://w3c.github.io/ServiceWorker/#dfn-service-worker"},
+"https://w3c.github.io/ServiceWorker/#dfn-service-worker-registration": {"displayText":"service worker registration","export":true,"for_":[],"level":"1","normative":true,"shortname":"service-workers","spec":"service-workers","status":"current","text":"service worker registration","type":"dfn","url":"https://w3c.github.io/ServiceWorker/#dfn-service-worker-registration"},
+"https://w3c.github.io/ServiceWorker/#dom-serviceworkercontainer-register": {"displayText":"register(scriptURL)","export":true,"for_":["ServiceWorkerContainer"],"level":"1","normative":true,"shortname":"service-workers","spec":"service-workers","status":"current","text":"register(scriptURL)","type":"method","url":"https://w3c.github.io/ServiceWorker/#dom-serviceworkercontainer-register"},
+"https://w3c.github.io/ServiceWorker/#extendableevent": {"displayText":"ExtendableEvent","export":true,"for_":[],"level":"1","normative":true,"shortname":"service-workers","spec":"service-workers","status":"current","text":"ExtendableEvent","type":"interface","url":"https://w3c.github.io/ServiceWorker/#extendableevent"},
+"https://w3c.github.io/ServiceWorker/#fire-functional-event": {"displayText":"Fire Functional Event","export":true,"for_":[],"level":"1","normative":true,"shortname":"service-workers","spec":"service-workers","status":"current","text":"fire functional event","type":"dfn","url":"https://w3c.github.io/ServiceWorker/#fire-functional-event"},
+"https://w3c.github.io/ServiceWorker/#serviceworkerglobalscope": {"displayText":"ServiceWorkerGlobalScope","export":true,"for_":[],"level":"1","normative":true,"shortname":"service-workers","spec":"service-workers","status":"current","text":"ServiceWorkerGlobalScope","type":"interface","url":"https://w3c.github.io/ServiceWorker/#serviceworkerglobalscope"},
+"https://w3c.github.io/clipboard-apis/#clipboard": {"displayText":"Clipboard","export":true,"for_":[],"level":"1","normative":true,"shortname":"clipboard-apis","spec":"clipboard-apis","status":"current","text":"Clipboard","type":"interface","url":"https://w3c.github.io/clipboard-apis/#clipboard"},
+"https://w3c.github.io/clipboard-apis/#clipboarditem": {"displayText":"ClipboardItem","export":true,"for_":[],"level":"1","normative":true,"shortname":"clipboard-apis","spec":"clipboard-apis","status":"current","text":"ClipboardItem","type":"interface","url":"https://w3c.github.io/clipboard-apis/#clipboarditem"},
+"https://w3c.github.io/webextensions/specification/#background-service-worker-registration": {"displayText":"background service worker registration","export":true,"for_":[],"level":"","normative":true,"shortname":"webextensions","spec":"webextensions","status":"anchor-block","text":"background service worker registration","type":"dfn","url":"https://w3c.github.io/webextensions/specification/#background-service-worker-registration"},
+"https://w3c.github.io/webextensions/specification/#dfn-extension-origin": {"displayText":"extension origin","export":true,"for_":[],"level":"","normative":true,"shortname":"webextensions","spec":"webextensions","status":"anchor-block","text":"extension origin","type":"dfn","url":"https://w3c.github.io/webextensions/specification/#dfn-extension-origin"},
+"https://w3c.github.io/webextensions/specification/#extension-permission-check": {"displayText":"extension permission check","export":true,"for_":[],"level":"","normative":true,"shortname":"webextensions","spec":"webextensions","status":"anchor-block","text":"extension permission check","type":"dfn","url":"https://w3c.github.io/webextensions/specification/#extension-permission-check"},
+"https://w3c.github.io/webextensions/specification/#extension-root-url": {"displayText":"extension root URL","export":true,"for_":[],"level":"","normative":true,"shortname":"webextensions","spec":"webextensions","status":"anchor-block","text":"extension root url","type":"dfn","url":"https://w3c.github.io/webextensions/specification/#extension-root-url"},
+"https://w3c.github.io/webextensions/specification/#extension-scheme": {"displayText":"extension scheme","export":true,"for_":[],"level":"","normative":true,"shortname":"webextensions","spec":"webextensions","status":"anchor-block","text":"extension scheme","type":"dfn","url":"https://w3c.github.io/webextensions/specification/#extension-scheme"},
+"https://w3c.github.io/webextensions/specification/#privileged-extension-context": {"displayText":"privileged extension context","export":true,"for_":[],"level":"","normative":true,"shortname":"webextensions","spec":"webextensions","status":"anchor-block","text":"privileged extension context","type":"dfn","url":"https://w3c.github.io/webextensions/specification/#privileged-extension-context"},
+"https://w3c.github.io/webextensions/specification/#register-the-background-service-worker": {"displayText":"register the background service worker","export":true,"for_":[],"level":"","normative":true,"shortname":"webextensions","spec":"webextensions","status":"anchor-block","text":"register the background service worker","type":"dfn","url":"https://w3c.github.io/webextensions/specification/#register-the-background-service-worker"},
+"https://w3c.github.io/webextensions/specification/window.browser.html#browser-interface": {"displayText":"Browser","export":true,"for_":[],"level":"","normative":true,"shortname":"webextensions-browser-global","spec":"webextensions-browser-global","status":"anchor-block","text":"Browser","type":"interface","url":"https://w3c.github.io/webextensions/specification/window.browser.html#browser-interface"},
+"https://webidl.spec.whatwg.org/#CrossOriginIsolated": {"displayText":"CrossOriginIsolated","export":true,"for_":[],"level":"1","normative":true,"shortname":"webidl","spec":"webidl","status":"current","text":"CrossOriginIsolated","type":"extended-attribute","url":"https://webidl.spec.whatwg.org/#CrossOriginIsolated"},
+"https://webidl.spec.whatwg.org/#Exposed": {"displayText":"Exposed","export":true,"for_":[],"level":"1","normative":true,"shortname":"webidl","spec":"webidl","status":"current","text":"Exposed","type":"extended-attribute","url":"https://webidl.spec.whatwg.org/#Exposed"},
+"https://webidl.spec.whatwg.org/#SecureContext": {"displayText":"SecureContext","export":true,"for_":[],"level":"1","normative":true,"shortname":"webidl","spec":"webidl","status":"current","text":"SecureContext","type":"extended-attribute","url":"https://webidl.spec.whatwg.org/#SecureContext"},
+"https://webidl.spec.whatwg.org/#dfn-exposed": {"displayText":"exposed","export":true,"for_":[],"level":"1","normative":true,"shortname":"webidl","spec":"webidl","status":"current","text":"exposed","type":"dfn","url":"https://webidl.spec.whatwg.org/#dfn-exposed"},
+"https://webidl.spec.whatwg.org/#dfn-exposure-set": {"displayText":"exposure set","export":true,"for_":[],"level":"1","normative":true,"shortname":"webidl","spec":"webidl","status":"current","text":"exposure set","type":"dfn","url":"https://webidl.spec.whatwg.org/#dfn-exposure-set"},
+"https://webidl.spec.whatwg.org/#dfn-global-name": {"displayText":"global names","export":true,"for_":[],"level":"1","normative":true,"shortname":"webidl","spec":"webidl","status":"current","text":"global names","type":"dfn","url":"https://webidl.spec.whatwg.org/#dfn-global-name"},
+};
+
+function mkRefHint(link, ref) {
+    const linkText = link.textContent;
+    let dfnTextElements = '';
+    if (ref.displayText.toLowerCase() != linkText.toLowerCase()) {
+        // Give the original term if it's being displayed in a different way.
+        // But allow casing differences, they're insignificant.
+        dfnTextElements =
+            mk.li({},
+                mk.b({}, "Term: "),
+                mk.span({}, ref.displayText)
+            );
+    }
+    const forList = ref.for_;
+    let forListElements;
+    if(forList.length == 0) {
+        forListElements = [];
+    } else if(forList.length == 1) {
+        forListElements = mk.li({},
+            mk.b({}, "For: "),
+            mk.span({}, forList[0]),
+        );
+    } else {
+        forListElements = mk.li({},
+            mk.b({}, "For: "),
+            mk.ul({},
+                ...forList.map(forItem =>
+                    mk.li({},
+                        mk.span({}, forItem)
+                    ),
+                ),
+            ),
+        );
+    }
+    const url = ref.url;
+    const safeUrl = encodeURIComponent(url);
+    const hintPanel = mk.aside({
+        class: "ref-hint",
+        id: `ref-hint-for-${safeUrl}`,
+        "data-for": url,
+        "aria-labelled-by": `ref-hint-for-${safeUrl}`,
+    },
+        mk.ul({},
+            dfnTextElements,
+            mk.li({},
+                mk.b({}, "URL: "),
+                mk.a({ href: url, class: "ref" }, url),
+            ),
+            mk.li({},
+                mk.b({}, "Type: "),
+                mk.span({}, `${ref.type}`),
+            ),
+            mk.li({},
+                mk.b({}, "Spec: "),
+                mk.span({}, `${ref.spec ? ref.spec : ''}`),
+            ),
+            forListElements
+        ),
+    );
+    hintPanel.forLink = link;
+    setupRefHintEventListeners(link, hintPanel);
+    return hintPanel;
+}
+
+function hideAllRefHints() {
+    queryAll(".ref-hint").forEach(el=>hideRefHint(el));
+}
+
+function hideRefHint(refHint) {
+    const link = refHint.forLink;
+    link.setAttribute("aria-expanded", "false");
+    if(refHint.teardownEventListeners) {
+        refHint.teardownEventListeners();
+    }
+    refHint.remove();
+}
+
+function showRefHint(link) {
+    if(link.classList.contains("dfn-link")) return;
+    const url = link.getAttribute("href");
+    const refHintKey = link.getAttribute("data-refhint-key");
+    let key = url;
+    if(refHintKey) {
+        key = refHintKey + "_" + url;
+    }
+    const ref = refsData[key];
+    if(!ref) return;
+
+    hideAllRefHints(); // Only display one at this time.
+
+    const refHint = mkRefHint(link, ref);
+    append(document.body, refHint);
+    link.setAttribute("aria-expanded", "true");
+    positionRefHint(refHint);
+}
+
+function setupRefHintEventListeners(link, refHint) {
+    if (refHint.teardownEventListeners) return;
+    // Add event handlers to hide the refHint after the user moves away
+    // from both the link and refHint, if not hovering either within one second.
+    let timeout = null;
+    const startHidingRefHint = (event) => {
+        if (timeout) {
+            clearTimeout(timeout);
+        }
+        timeout = setTimeout(() => {
+            hideRefHint(refHint);
+        }, 1000);
+    }
+    const resetHidingRefHint = (event) => {
+        if (timeout) clearTimeout(timeout);
+        timeout = null;
+    };
+    link.addEventListener("mouseleave", startHidingRefHint);
+    link.addEventListener("mouseenter", resetHidingRefHint);
+    link.addEventListener("blur", startHidingRefHint);
+    link.addEventListener("focus", resetHidingRefHint);
+    refHint.addEventListener("mouseleave", startHidingRefHint);
+    refHint.addEventListener("mouseenter", resetHidingRefHint);
+    refHint.addEventListener("blur", startHidingRefHint);
+    refHint.addEventListener("focus", resetHidingRefHint);
+
+    refHint.teardownEventListeners = () => {
+        // remove event listeners
+        resetHidingRefHint();
+        link.removeEventListener("mouseleave", startHidingRefHint);
+        link.removeEventListener("mouseenter", resetHidingRefHint);
+        link.removeEventListener("blur", startHidingRefHint);
+        link.removeEventListener("focus", resetHidingRefHint);
+        refHint.removeEventListener("mouseleave", startHidingRefHint);
+        refHint.removeEventListener("mouseenter", resetHidingRefHint);
+        refHint.removeEventListener("blur", startHidingRefHint);
+        refHint.removeEventListener("focus", resetHidingRefHint);
+    };
+}
+
+function positionRefHint(refHint) {
+    const link = refHint.forLink;
+    const linkPos = getBounds(link);
+    refHint.style.top = linkPos.bottom + "px";
+    refHint.style.left = linkPos.left + "px";
+
+    const panelPos = refHint.getBoundingClientRect();
+    const panelMargin = 8;
+    const maxRight = document.body.parentNode.clientWidth - panelMargin;
+    if (panelPos.right > maxRight) {
+        const overflowAmount = panelPos.right - maxRight;
+        const newLeft = Math.max(panelMargin, linkPos.left - overflowAmount);
+        refHint.style.left = newLeft + "px";
+    }
+}
+
+// TODO: shared util
+// Returns the root-level absolute position {left and top} of element.
+function getBounds(el, relativeTo=document.body) {
+    const relativeRect = relativeTo.getBoundingClientRect();
+    const elRect = el.getBoundingClientRect();
+    const top = elRect.top - relativeRect.top;
+    const left = elRect.left - relativeRect.left;
+    return {
+        top,
+        left,
+        bottom: top + elRect.height,
+        right: left + elRect.width,
+    }
+}
+
+function showRefHintListener(e) {
+    // If the target isn't in a link (or is a link),
+    // just ignore it.
+    let link = e.target.closest("a");
+    if(!link) return;
+
+    // If the target is in a ref-hint panel
+    // (aka a link in the already-open one),
+    // also just ignore it.
+    if(link.closest(".ref-hint")) return;
+
+    // Otherwise, show the panel for the link.
+    showRefHint(link);
+}
+
+function hideAllHintsListener(e) {
+    // If the click is inside a ref-hint panel, ignore it.
+    if(e.target.closest(".ref-hint")) return;
+    // Otherwise, close all the current panels.
+    hideAllRefHints();
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    document.body.addEventListener("mousedown", showRefHintListener);
+    document.body.addEventListener("focus", showRefHintListener);
+
+    document.body.addEventListener("click", hideAllHintsListener);
+});
+
+window.addEventListener("resize", () => {
+    // Hide any open ref hint.
+    hideAllRefHints();
+});
+}
+</script>
