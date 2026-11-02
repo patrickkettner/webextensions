@@ -7,7 +7,7 @@
   <link href="https://www.w3.org/StyleSheets/TR/2021/cg-draft" rel="stylesheet">
   <meta content="Bikeshed version 49e9fdd4f, updated Tue Oct 13 14:27:53 2026 -0700" name="generator">
   <link href="https://w3c.github.io/webextensions/specification/extension-service-workers.html" rel="canonical">
-  <meta content="02ef7f7a42948d61e613d97b97403ab9768d0c4c" name="revision">
+  <meta content="f641d69019c309977d74993a0b331ae5147a9b27" name="revision">
   <meta content="dark light" name="color-scheme">
   <link href="https://www.w3.org/StyleSheets/TR/2021/dark.css" media="(prefers-color-scheme: dark)" rel="stylesheet" type="text/css">
 <style>/* Boilerplate: style-autolinks */
@@ -779,10 +779,10 @@ placed on the latter alone.</p>
 authorization to use the capability it provides. The extension’s permissions
 are checked on each use, independently of exposure, as described in
 <a href="#security">Security considerations</a>.</p>
-   <p class="issue" id="issue-8bc9d7ba"><a class="self-link" href="#issue-8bc9d7ba"></a> WebIDL does not currently allow a condition on an individual entry of
+   <p class="issue" id="issue-72cafe48"><a class="self-link" href="#issue-72cafe48"></a> WebIDL does not currently allow a condition on an individual entry of
 an <a data-link-type="dfn" href="https://webidl.spec.whatwg.org/#dfn-exposure-set" id="ref-for-dfn-exposure-set②">exposure set</a>. Its exposure conditions ([<code class="idl"><a data-link-type="idl" href="https://webidl.spec.whatwg.org/#SecureContext" id="ref-for-SecureContext">SecureContext</a></code>] and
-[<code class="idl"><a data-link-type="idl" href="https://webidl.spec.whatwg.org/#CrossOriginIsolated" id="ref-for-CrossOriginIsolated">CrossOriginIsolated</a></code>]) apply to a whole construct. A proposal to WebIDL
-is being prepared. Until WebIDL accepts a mechanism, no specification can
+[<code class="idl"><a data-link-type="idl" href="https://webidl.spec.whatwg.org/#CrossOriginIsolated" id="ref-for-CrossOriginIsolated">CrossOriginIsolated</a></code>]) apply to a whole construct. This requires a
+proposal to WebIDL. Until WebIDL accepts a mechanism, no specification can
 reference the <a data-link-type="dfn" href="#extension-service-worker-realm" id="ref-for-extension-service-worker-realm⑤">extension service worker realm</a> from IDL, and
 <a href="#current-exposures">Current exposures</a> describes intended exposure.</p>
    <h3 class="heading settled" id="exposing"><span class="content">Exposing a capability to extension service workers</span></h3>
@@ -1171,10 +1171,10 @@ the <a data-link-type="dfn" href="#extension-service-worker">extension service w
    </div>
    <div class="issue"> WebIDL does not currently allow a condition on an individual entry of
 an <a data-link-type="dfn" href="https://webidl.spec.whatwg.org/#dfn-exposure-set">exposure set</a>. Its exposure conditions ([<code class="idl"><a data-link-type="idl" href="https://webidl.spec.whatwg.org/#SecureContext">SecureContext</a></code>] and
-[<code class="idl"><a data-link-type="idl" href="https://webidl.spec.whatwg.org/#CrossOriginIsolated">CrossOriginIsolated</a></code>]) apply to a whole construct. A proposal to WebIDL
-is being prepared. Until WebIDL accepts a mechanism, no specification can
+[<code class="idl"><a data-link-type="idl" href="https://webidl.spec.whatwg.org/#CrossOriginIsolated">CrossOriginIsolated</a></code>]) apply to a whole construct. This requires a
+proposal to WebIDL. Until WebIDL accepts a mechanism, no specification can
 reference the <a data-link-type="dfn" href="#extension-service-worker-realm">extension service worker realm</a> from IDL, and
-<a href="#current-exposures">Current exposures</a> describes intended exposure. <a class="issue-return" href="#issue-8bc9d7ba" title="Jump to section">↵</a></div>
+<a href="#current-exposures">Current exposures</a> describes intended exposure. <a class="issue-return" href="#issue-72cafe48" title="Jump to section">↵</a></div>
    <div class="issue"> <a data-link-type="biblio" href="#biblio-webextensions-browser-global" title="window.browser">[webextensions-browser-global]</a> declares
 <code>partial interface ServiceWorkerGlobalScope { attribute Browser browser; }</code>,
 which, read literally, exposes <code class="idl"><a data-link-type="idl" href="https://w3c.github.io/webextensions/specification/window.browser.html#browser-interface">Browser</a></code> in every <a data-link-type="dfn" href="https://w3c.github.io/ServiceWorker/#dfn-service-worker">service worker</a>. The
